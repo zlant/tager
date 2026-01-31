@@ -1,0 +1,166 @@
+.edit-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+}
+
+.edit-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.edit-info {
+  color: #666;
+}
+
+.edit-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0;
+  overflow: hidden;
+}
+
+.map-cell {
+  position: relative;
+  border: 1px solid #ddd;
+}
+
+.map-top-left {
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.map-top-right {
+  border-bottom: 1px solid #ddd;
+}
+
+.map-bottom-left {
+  border-right: 1px solid #ddd;
+}
+
+.form-cell {
+  padding: 1.5rem;
+  background: #fafafa;
+  overflow-y: auto;
+}
+
+.sport-form h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.sport-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.sport-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.sport-checkbox:hover {
+  background: #f0f0f0;
+}
+
+.sport-checkbox input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.custom-sport-input {
+  margin-bottom: 1.5rem;
+}
+
+.custom-sport-input label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.custom-sport-input input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.confirm-button,
+.skip-button,
+.finish-button {
+  flex: 1;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.confirm-button {
+  background: #4CAF50;
+  color: white;
+}
+
+.confirm-button:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.finish-button {
+  background: #2196F3;
+  color: white;
+}
+
+.finish-button:hover:not(:disabled) {
+  background: #0b7dda;
+}
+
+.skip-button {
+  background: #ff9800;
+  color: white;
+}
+
+.skip-button:hover:not(:disabled) {
+  background: #f57c00;
+}
+
+.confirm-button:disabled,
+.skip-button:disabled,
+.finish-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.no-objects {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  color: #666;
+}
