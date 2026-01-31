@@ -1,13 +1,9 @@
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { auth, getAccessToken } from '../utils/osmAuth'
 import './LoginPage.css'
 
-const OSM_OAUTH_CLIENT_ID = import.meta.env.VITE_OSM_OAUTH_CLIENT_ID || 'your_client_id'
-const OSM_OAUTH_REDIRECT_URI = import.meta.env.VITE_OSM_OAUTH_REDIRECT_URI || 
-  `${window.location.origin}/login`
-const OSM_OAUTH_URL = 'https://www.openstreetmap.org/oauth2/authorize'
-const OSM_TOKEN_URL = 'https://www.openstreetmap.org/oauth2/token'
 const OSM_USER_URL = 'https://api.openstreetmap.org/api/0.6/user/details'
 
 const LoginPage = () => {
@@ -23,37 +19,20 @@ const LoginPage = () => {
 
     const code = searchParams.get('code')
     if (code) {
-      handleOAuthCallback(code)
+      handleOAuthCallback()
     }
   }, [searchParams, isAuthenticated, navigate])
 
-  const handleOAuthCallback = async (code: string) => {
+  const handleOAuthCallback = async () => {
     try {
-      const tokenResponse = await fetch(OSM_TOKEN_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          code,
-          redirect_uri: OSM_OAUTH_REDIRECT_URI,
-          client_id: OSM_OAUTH_CLIENT_ID,
-          client_secret: import.meta.env.VITE_OSM_OAUTH_CLIENT_SECRET || '',
-        }),
-      })
+      await auth.authenticateAsync()
 
-      if (!tokenResponse.ok) {
-        throw new Error('Failed to get access token')
+      if (!auth.authenticated()) {
+        throw new Error('Authentication failed')
       }
 
-      const tokenData = await tokenResponse.json()
-      const accessToken = tokenData.access_token
-
-      const userResponse = await fetch(OSM_USER_URL, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+      const userResponse = await auth.fetch(OSM_USER_URL, {
+        method: 'GET',
       })
 
       if (!userResponse.ok) {
@@ -75,7 +54,12 @@ const LoginPage = () => {
         displayName: userElement.getAttribute('display_name') || '',
       }
 
-      login(user, accessToken)
+      const token = getAccessToken()
+      if (!token) {
+        throw new Error('Access token not found')
+      }
+
+      login(user, token)
       navigate('/search', { replace: true })
     } catch (error) {
       console.error('OAuth callback error:', error)
@@ -83,15 +67,12 @@ const LoginPage = () => {
     }
   }
 
-  const handleLogin = () => {
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: OSM_OAUTH_CLIENT_ID,
-      redirect_uri: OSM_OAUTH_REDIRECT_URI,
-      scope: 'read_prefs write_api',
-    })
-
-    window.location.href = `${OSM_OAUTH_URL}?${params.toString()}`
+  const handleLogin = async () => {
+    try {
+      await auth.authenticateAsync()
+    } catch (error) {
+      console.error('Login error:', error)
+    }
   }
 
   return (
@@ -106,7 +87,7 @@ const LoginPage = () => {
           <p>Для работы приложения необходимо:</p>
           <ol>
             <li>Зарегистрировать OAuth приложение на <a href="https://www.openstreetmap.org/user/your_username/oauth_clients" target="_blank" rel="noopener noreferrer">OpenStreetMap</a></li>
-            <li>Указать Client ID и Client Secret в файле .env</li>
+            <li>Указать Client ID в файле .env</li>
           </ol>
         </div>
       </div>

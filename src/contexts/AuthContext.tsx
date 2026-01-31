@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { auth, getAccessToken } from '../utils/osmAuth'
 
 interface User {
   id: number
@@ -30,10 +31,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const storedUser = localStorage.getItem('osm_user')
-    const storedToken = localStorage.getItem('osm_token')
-    if (storedUser && storedToken) {
+    const storedToken = getAccessToken()
+    
+    if (storedUser && storedToken && auth.authenticated()) {
       setUser(JSON.parse(storedUser))
       setToken(storedToken)
+    } else if (!auth.authenticated()) {
+      setUser(null)
+      setToken(null)
+      localStorage.removeItem('osm_user')
     }
   }, [])
 
@@ -41,14 +47,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(userData)
     setToken(userToken)
     localStorage.setItem('osm_user', JSON.stringify(userData))
-    localStorage.setItem('osm_token', userToken)
   }
 
   const logout = () => {
+    auth.logout()
     setUser(null)
     setToken(null)
     localStorage.removeItem('osm_user')
-    localStorage.removeItem('osm_token')
   }
 
   return (
@@ -58,7 +63,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         token,
         login,
         logout,
-        isAuthenticated: !!user && !!token,
+        isAuthenticated: !!user && !!token && auth.authenticated(),
       }}
     >
       {children}
