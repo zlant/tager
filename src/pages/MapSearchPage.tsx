@@ -49,6 +49,14 @@ const loadSavedPosition = (): { center: [number, number]; zoom: number } => {
   }
 }
 
+const EDIT_MODE_STORAGE_KEY = 'mapSearchEditMode'
+
+const loadSavedEditMode = (): EditMode => {
+  const raw = localStorage.getItem(EDIT_MODE_STORAGE_KEY)
+  if (raw === 'pitch' || raw === 'residential') return raw
+  return 'pitch'
+}
+
 interface MapClickHandlerProps {
   onMapClick: (bounds: L.LatLngBounds) => void
   onMoveEnd?: (center: L.LatLng, zoom: number) => void
@@ -85,7 +93,12 @@ const MapSearchPage = () => {
   const [initialPosition] = useState(() => loadSavedPosition())
   const [bounds, setBounds] = useState<L.LatLngBounds | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [editMode, setEditMode] = useState<EditMode>('pitch')
+  const [editMode, setEditModeState] = useState<EditMode>(loadSavedEditMode)
+
+  const setEditMode = (mode: EditMode) => {
+    setEditModeState(mode)
+    localStorage.setItem(EDIT_MODE_STORAGE_KEY, mode)
+  }
 
   const savePosition = (center: L.LatLng, zoom: number) => {
     localStorage.setItem(MAP_POSITION_KEY, JSON.stringify({
