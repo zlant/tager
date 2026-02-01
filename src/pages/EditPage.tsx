@@ -46,7 +46,7 @@ const POPULAR_SPORTS = [
   'soccer',
   'baseball',
   'rugby',
-  'hockey',
+  'ice_hockey',
   'badminton',
   'table_tennis',
   'handball',
