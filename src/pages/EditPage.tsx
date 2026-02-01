@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { useAuth } from '../contexts/AuthContext'
+import packageJson from '../../package.json'
 import './EditPage.css'
+
+const EDITOR_TAG = `tager ${packageJson.version}`
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -263,7 +266,7 @@ const EditPage = () => {
     const changesetXml = `<?xml version="1.0" encoding="UTF-8"?>
 <osm>
   <changeset>
-    <tag k="created_by" v="OSM Sport Tag Editor"/>
+    <tag k="created_by" v="${EDITOR_TAG}"/>
     <tag k="comment" v="Добавление тега sport для объектов leisure=pitch"/>
   </changeset>
 </osm>`
@@ -323,7 +326,7 @@ const EditPage = () => {
 
   const generateOSMChangeXML = (changes: Array<{ object: OSMObject; sport: string }>, changesetId: string): string => {
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<osmChange version="0.6" generator="OSM Sport Tag Editor">
+<osmChange version="0.6" generator="${EDITOR_TAG}">
   <modify>
 `
     for (const change of changes) {

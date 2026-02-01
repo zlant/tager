@@ -1,6 +1,6 @@
 {
-  "name": "osmer-sport-tag-editor",
-  "version": "1.0.0",
+  "name": "tager",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
