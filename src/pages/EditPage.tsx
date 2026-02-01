@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { useAuth } from '../contexts/AuthContext'
+import type { EditMode } from './MapSearchPage'
 import packageJson from '../../package.json'
 import './EditPage.css'
+
+const EDIT_MODE_KEY = 'edit_mode'
 
 const EDITOR_TAG = `tager ${packageJson.version}`
 
@@ -54,6 +57,17 @@ const POPULAR_SPORTS = [
   'beachvolleyball',
   'american_football',
   'cricket',
+]
+
+const POPULAR_RESIDENTIAL = [
+  'apartments',
+  'houses',
+  'detached',
+  'terrace',
+  'duplex',
+  'urban',
+  'rural',
+  'dormitory',
 ]
 
 interface ViewState {
@@ -177,9 +191,14 @@ const EditPage = () => {
   const { user, token } = useAuth()
   const [objects, setObjects] = useState<OSMObject[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [editMode, setEditMode] = useState<EditMode>('pitch')
   const [selectedSports, setSelectedSports] = useState<string[]>([])
   const [customSport, setCustomSport] = useState('')
-  const [changes, setChanges] = useState<Array<{ object: OSMObject; sport: string }>>([])
+  const [selectedResidential, setSelectedResidential] = useState<string[]>([])
+  const [customResidential, setCustomResidential] = useState('')
+  const [changes, setChanges] = useState<
+    Array<{ object: OSMObject; tagKey: 'sport' | 'residential'; tagValue: string }>
+  >([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [viewState, setViewState] = useState<ViewState | null>(null)
@@ -207,7 +226,11 @@ const EditPage = () => {
     const storedObjects = sessionStorage.getItem('osm_objects')
     const storedIndex = sessionStorage.getItem('current_index')
     const storedFullJson = sessionStorage.getItem('osm_full_json')
+    const storedMode = sessionStorage.getItem(EDIT_MODE_KEY) as EditMode | null
 
+    if (storedMode === 'pitch' || storedMode === 'residential') {
+      setEditMode(storedMode)
+    }
     if (storedObjects) {
       try {
         const parsed = JSON.parse(storedObjects) as OSMObject[]
@@ -224,24 +247,41 @@ const EditPage = () => {
 
   const currentObject = objects[currentIndex] || null
 
+  const tagKey: 'sport' | 'residential' = editMode === 'pitch' ? 'sport' : 'residential'
+
   const handleSportToggle = (sport: string) => {
     setSelectedSports((prev) =>
       prev.includes(sport) ? prev.filter((s) => s !== sport) : [...prev, sport]
     )
   }
 
-  const handleConfirm = () => {
-    const sportValue = customSport.trim() || selectedSports.join(';')
+  const handleResidentialToggle = (value: string) => {
+    setSelectedResidential((prev) =>
+      prev.includes(value) ? prev.filter((s) => s !== value) : [...prev, value]
+    )
+  }
 
-    if (!sportValue) {
-      alert('Выберите или введите значение для тега sport')
+  const handleConfirm = () => {
+    const tagValue =
+      editMode === 'pitch'
+        ? customSport.trim() || selectedSports.join(';')
+        : customResidential.trim() || selectedResidential.join(';')
+
+    if (!tagValue) {
+      alert(
+        editMode === 'pitch'
+          ? 'Выберите или введите значение для тега sport'
+          : 'Выберите или введите значение для тега residential'
+      )
       return
     }
 
-    const newChanges = [...changes, { object: currentObject!, sport: sportValue }]
+    const newChanges = [...changes, { object: currentObject!, tagKey, tagValue }]
     setChanges(newChanges)
     setSelectedSports([])
     setCustomSport('')
+    setSelectedResidential([])
+    setCustomResidential('')
 
     if (currentIndex < objects.length - 1) {
       const nextIndex = currentIndex + 1
@@ -255,6 +295,8 @@ const EditPage = () => {
   const handleSkip = () => {
     setSelectedSports([])
     setCustomSport('')
+    setSelectedResidential([])
+    setCustomResidential('')
 
     if (currentIndex < objects.length - 1) {
       const nextIndex = currentIndex + 1
@@ -270,7 +312,9 @@ const EditPage = () => {
     }
   }
 
-  const handleFinish = async (overrideChanges?: Array<{ object: OSMObject; sport: string }>) => {
+  const handleFinish = async (
+    overrideChanges?: Array<{ object: OSMObject; tagKey: 'sport' | 'residential'; tagValue: string }>
+  ) => {
     const changesToSave = overrideChanges ?? changes
     if (changesToSave.length === 0) {
       alert('Нет изменений для сохранения')
@@ -296,11 +340,15 @@ const EditPage = () => {
   }
 
   const createChangeset = async (): Promise<string> => {
+    const comment =
+      editMode === 'pitch'
+        ? 'Добавление тега sport для объектов leisure=pitch'
+        : 'Добавление тега residential для объектов landuse=residential'
     const changesetXml = `<?xml version="1.0" encoding="UTF-8"?>
 <osm>
   <changeset>
     <tag k="created_by" v="${EDITOR_TAG}"/>
-    <tag k="comment" v="Добавление тега sport для объектов leisure=pitch"/>
+    <tag k="comment" v="${comment}"/>
   </changeset>
 </osm>`
 
@@ -336,8 +384,13 @@ const EditPage = () => {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
 
-  const elementToOsmXml = (el: OverpassElement, changesetId: string, sport: string): string => {
-    const tags = { ...el.tags, sport }
+  const elementToOsmXml = (
+    el: OverpassElement,
+    changesetId: string,
+    tagKey: string,
+    tagValue: string
+  ): string => {
+    const tags = { ...el.tags, [tagKey]: tagValue }
     const v = el.version ?? 1
     const ts = el.timestamp ?? ''
     if (el.type === 'way') {
@@ -357,13 +410,21 @@ const EditPage = () => {
     return ''
   }
 
-  const generateOSMChangeXML = (changes: Array<{ object: OSMObject; sport: string }>, changesetId: string): string => {
+  const generateOSMChangeXML = (
+    changes: Array<{ object: OSMObject; tagKey: 'sport' | 'residential'; tagValue: string }>,
+    changesetId: string
+  ): string => {
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <osmChange version="0.6" generator="${EDITOR_TAG}">
   <modify>
 `
     for (const change of changes) {
-      const part = elementToOsmXml(change.object.json, changesetId, change.sport)
+      const part = elementToOsmXml(
+        change.object.json,
+        changesetId,
+        change.tagKey,
+        change.tagValue
+      )
       if (part) xml += part + '\n'
     }
     xml += `  </modify>
@@ -498,30 +559,61 @@ const EditPage = () => {
         </button>
         <div className="form-cell" ref={formCellRef}>
           <div className="sport-form">
-            <h3>Выберите значение тега sport</h3>
-            <div className="sport-checkboxes">
-              {POPULAR_SPORTS.map((sport) => (
-                <label key={sport} className="sport-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={selectedSports.includes(sport)}
-                    onChange={() => handleSportToggle(sport)}
-                  />
-                  <span>{sport}</span>
-                </label>
-              ))}
-            </div>
-            <div className="custom-sport-input">
-              <label>
-                Или введите свое значение:
-                <input
-                  type="text"
-                  value={customSport}
-                  onChange={(e) => setCustomSport(e.target.value)}
-                  placeholder="например: football;basketball"
-                />
-              </label>
-            </div>
+            {editMode === 'pitch' ? (
+              <>
+                <h3>Выберите значение тега sport</h3>
+                <div className="sport-checkboxes">
+                  {POPULAR_SPORTS.map((sport) => (
+                    <label key={sport} className="sport-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={selectedSports.includes(sport)}
+                        onChange={() => handleSportToggle(sport)}
+                      />
+                      <span>{sport}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="custom-sport-input">
+                  <label>
+                    Или введите свое значение:
+                    <input
+                      type="text"
+                      value={customSport}
+                      onChange={(e) => setCustomSport(e.target.value)}
+                      placeholder="например: football;basketball"
+                    />
+                  </label>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3>Выберите значение тега residential</h3>
+                <div className="sport-checkboxes">
+                  {POPULAR_RESIDENTIAL.map((value) => (
+                    <label key={value} className="sport-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={selectedResidential.includes(value)}
+                        onChange={() => handleResidentialToggle(value)}
+                      />
+                      <span>{value}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="custom-sport-input">
+                  <label>
+                    Или введите свое значение:
+                    <input
+                      type="text"
+                      value={customResidential}
+                      onChange={(e) => setCustomResidential(e.target.value)}
+                      placeholder="например: apartments"
+                    />
+                  </label>
+                </div>
+              </>
+            )}
             <div className="form-buttons">
               <button
                 onClick={handleConfirm}

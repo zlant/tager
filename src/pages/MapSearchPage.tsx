@@ -14,6 +14,10 @@ L.Icon.Default.mergeOptions({
 
 const MAP_POSITION_KEY = 'mapSearchPosition'
 
+export type EditMode = 'pitch' | 'residential'
+
+const EDIT_MODE_KEY = 'edit_mode'
+
 interface OverpassElement {
   type: 'node' | 'way' | 'relation'
   id: number
@@ -81,6 +85,7 @@ const MapSearchPage = () => {
   const [initialPosition] = useState(() => loadSavedPosition())
   const [bounds, setBounds] = useState<L.LatLngBounds | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [editMode, setEditMode] = useState<EditMode>('pitch')
 
   const savePosition = (center: L.LatLng, zoom: number) => {
     localStorage.setItem(MAP_POSITION_KEY, JSON.stringify({
@@ -95,11 +100,22 @@ const MapSearchPage = () => {
     setIsLoading(true)
     try {
       const bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`
-      const overpassQuery = `
+      const overpassQuery =
+        editMode === 'pitch'
+          ? `
         [out:json][timeout:25];
         (
           way["leisure"="pitch"][!"sport"](${bbox});
           relation["leisure"="pitch"][!"sport"](${bbox});
+        );
+        (._;>;);
+        out meta;
+      `
+          : `
+        [out:json][timeout:25];
+        (
+          way["landuse"="residential"][!"residential"](${bbox});
+          relation["landuse"="residential"][!"residential"](${bbox});
         );
         (._;>;);
         out meta;
@@ -118,23 +134,47 @@ const MapSearchPage = () => {
       }
 
       const data: OverpassResponse = await response.json()
-      const pitchWays = (data.elements ?? []).filter(
-        (e) => e.type === 'way' && e.tags?.leisure === 'pitch' && !e.tags?.sport
-      )
-      const pitchRelations = (data.elements ?? []).filter(
-        (e) => e.type === 'relation' && e.tags?.leisure === 'pitch' && !e.tags?.sport
-      )
-      const pitchElements = [...pitchWays, ...pitchRelations]
+      const targetElements =
+        editMode === 'pitch'
+          ? [
+              ...(data.elements ?? []).filter(
+                (e) => e.type === 'way' && e.tags?.leisure === 'pitch' && !e.tags?.sport
+              ),
+              ...(data.elements ?? []).filter(
+                (e) =>
+                  e.type === 'relation' &&
+                  e.tags?.leisure === 'pitch' &&
+                  !e.tags?.sport
+              ),
+            ]
+          : [
+              ...(data.elements ?? []).filter(
+                (e) =>
+                  e.type === 'way' &&
+                  e.tags?.landuse === 'residential' &&
+                  !e.tags?.residential
+              ),
+              ...(data.elements ?? []).filter(
+                (e) =>
+                  e.type === 'relation' &&
+                  e.tags?.landuse === 'residential' &&
+                  !e.tags?.residential
+              ),
+            ]
 
-      if (pitchElements.length === 0) {
-        alert('В выбранной области не найдено объектов leisure=pitch без тега sport')
+      if (targetElements.length === 0) {
+        alert(
+          editMode === 'pitch'
+            ? 'В выбранной области не найдено объектов leisure=pitch без тега sport'
+            : 'В выбранной области не найдено объектов landuse=residential без тега residential'
+        )
         setIsLoading(false)
         return
       }
 
       const allElements = data.elements ?? []
 
-      const objects = pitchElements.map((el) => ({
+      const objects = targetElements.map((el) => ({
         id: String(el.id),
         type: el.type,
         version: String(el.version ?? 1),
@@ -144,6 +184,7 @@ const MapSearchPage = () => {
       }))
 
       try {
+        sessionStorage.setItem(EDIT_MODE_KEY, editMode)
         sessionStorage.setItem('osm_full_json', JSON.stringify(allElements))
         sessionStorage.setItem('osm_objects', JSON.stringify(objects))
         sessionStorage.setItem('current_index', '0')
@@ -179,35 +220,58 @@ const MapSearchPage = () => {
           <span>Пользователь: {user?.displayName}</span>
         </div>
       </div>
-      <div className="map-container-wrapper">
-        <MapContainer
-          center={initialPosition.center}
-          zoom={initialPosition.zoom}
-          maxZoom={25}
-          style={{ height: '100%', width: '100%' }}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            maxNativeZoom={19}
+      <div className="map-search-body">
+        <aside className="map-search-sidebar">
+          <div className="mode-selector">
+            <span className="mode-label">Режим</span>
+            <label className="mode-option">
+              <input
+                type="radio"
+                name="editMode"
+                checked={editMode === 'pitch'}
+                onChange={() => setEditMode('pitch')}
+              />
+              <span>leisure=pitch без sport</span>
+            </label>
+            <label className="mode-option">
+              <input
+                type="radio"
+                name="editMode"
+                checked={editMode === 'residential'}
+                onChange={() => setEditMode('residential')}
+              />
+              <span>landuse=residential без residential</span>
+            </label>
+          </div>
+          <p className="sidebar-hint">Переместите карту к нужной области и нажмите «Загрузить объекты»</p>
+          <button
+            onClick={handleConfirm}
+            disabled={!bounds || isLoading}
+            className="confirm-button"
+          >
+            {isLoading ? 'Загрузка...' : 'Загрузить объекты'}
+          </button>
+        </aside>
+        <div className="map-container-wrapper">
+          <MapContainer
+            center={initialPosition.center}
+            zoom={initialPosition.zoom}
             maxZoom={25}
-          />
-          <MapResizeFix />
-          <MapClickHandler
-            onMapClick={(newBounds) => setBounds(newBounds)}
-            onMoveEnd={savePosition}
-          />
-        </MapContainer>
-      </div>
-      <div className="map-search-controls">
-        <p>Переместите карту к интересующей местности и нажмите "Загрузить объекты"</p>
-        <button
-          onClick={handleConfirm}
-          disabled={!bounds || isLoading}
-          className="confirm-button"
-        >
-          {isLoading ? 'Загрузка...' : 'Загрузить объекты'}
-        </button>
+            style={{ height: '100%', width: '100%' }}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              maxNativeZoom={19}
+              maxZoom={25}
+            />
+            <MapResizeFix />
+            <MapClickHandler
+              onMapClick={(newBounds) => setBounds(newBounds)}
+              onMoveEnd={savePosition}
+            />
+          </MapContainer>
+        </div>
       </div>
     </div>
   )
