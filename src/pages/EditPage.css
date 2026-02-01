@@ -19,7 +19,19 @@
 }
 
 .edit-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   color: #666;
+}
+
+.edit-info .osm-link {
+  color: #2196F3;
+  text-decoration: none;
+}
+
+.edit-info .osm-link:hover {
+  text-decoration: underline;
 }
 
 .edit-grid {

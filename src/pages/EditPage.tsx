@@ -372,6 +372,14 @@ const EditPage = () => {
           <span>
             Объект {currentIndex + 1} из {objects.length}
           </span>
+          <a
+            href={`https://www.openstreetmap.org/${currentObject.json.type}/${currentObject.json.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="osm-link"
+          >
+            Открыть на osm.org
+          </a>
         </div>
       </div>
       <div className="edit-grid">
