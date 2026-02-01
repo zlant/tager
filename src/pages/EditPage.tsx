@@ -206,9 +206,16 @@ const EditPage = () => {
   useEffect(() => {
     const storedObjects = sessionStorage.getItem('osm_objects')
     const storedIndex = sessionStorage.getItem('current_index')
+    const storedFullJson = sessionStorage.getItem('osm_full_json')
 
     if (storedObjects) {
-      setObjects(JSON.parse(storedObjects))
+      try {
+        const parsed = JSON.parse(storedObjects) as OSMObject[]
+        const fullJson: OverpassElement[] = storedFullJson ? JSON.parse(storedFullJson) : []
+        setObjects(parsed.map((o) => ({ ...o, fullJson })))
+      } catch {
+        setObjects([])
+      }
     }
     if (storedIndex) {
       setCurrentIndex(parseInt(storedIndex))

@@ -141,11 +141,28 @@ const MapSearchPage = () => {
         changeset: String(el.changeset ?? 0),
         timestamp: el.timestamp ?? '',
         json: el,
-        fullJson: allElements,
       }))
 
-      sessionStorage.setItem('osm_objects', JSON.stringify(objects))
-      sessionStorage.setItem('current_index', '0')
+      try {
+        sessionStorage.setItem('osm_full_json', JSON.stringify(allElements))
+        sessionStorage.setItem('osm_objects', JSON.stringify(objects))
+        sessionStorage.setItem('current_index', '0')
+      } catch (e) {
+        if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+          sessionStorage.removeItem('osm_full_json')
+          try {
+            sessionStorage.setItem('osm_objects', JSON.stringify(objects))
+            sessionStorage.setItem('current_index', '0')
+          } catch {
+            alert('Слишком много объектов для загрузки. Уменьшите область поиска.')
+            setIsLoading(false)
+            return
+          }
+          alert('Объекты загружены без геометрии площадок (ограничение памяти). Редактирование тегов доступно.')
+        } else {
+          throw e
+        }
+      }
       navigate('/edit')
     } catch (error) {
       console.error('Error loading objects:', error)
