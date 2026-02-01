@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { useAuth } from '../contexts/AuthContext'
 import './MapSearchPage.css'
@@ -48,6 +48,20 @@ const loadSavedPosition = (): { center: [number, number]; zoom: number } => {
 interface MapClickHandlerProps {
   onMapClick: (bounds: L.LatLngBounds) => void
   onMoveEnd?: (center: L.LatLng, zoom: number) => void
+}
+
+const MapResizeFix: React.FC = () => {
+  const map = useMap()
+  useEffect(() => {
+    const fix = () => map.invalidateSize()
+    const t = setTimeout(fix, 100)
+    window.addEventListener('resize', fix)
+    return () => {
+      clearTimeout(t)
+      window.removeEventListener('resize', fix)
+    }
+  }, [map])
+  return null
 }
 
 const MapClickHandler: React.FC<MapClickHandlerProps> = ({ onMapClick, onMoveEnd }) => {
@@ -161,6 +175,7 @@ const MapSearchPage = () => {
             maxNativeZoom={19}
             maxZoom={25}
           />
+          <MapResizeFix />
           <MapClickHandler
             onMapClick={(newBounds) => setBounds(newBounds)}
             onMoveEnd={savePosition}

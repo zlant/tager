@@ -101,6 +101,20 @@ const MapSyncView: React.FC<MapSyncViewProps> = ({
   return null
 }
 
+const MapResizeFix: React.FC = () => {
+  const map = useMap()
+  useEffect(() => {
+    const fix = () => map.invalidateSize()
+    const t = setTimeout(fix, 100)
+    window.addEventListener('resize', fix)
+    return () => {
+      clearTimeout(t)
+      window.removeEventListener('resize', fix)
+    }
+  }, [map])
+  return null
+}
+
 interface ObjectOutlineProps {
   object: OSMObject | null
 }
@@ -136,7 +150,11 @@ const ObjectOutline: React.FC<ObjectOutlineProps> = ({ object }) => {
         })
         layerGroup.addLayer(polygon)
         if (coords.length > 1) {
-          map.fitBounds(polygon.getBounds(), { padding: [20, 20] })
+          const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+          map.fitBounds(polygon.getBounds(), {
+            padding: [20, 20],
+            ...(isMobile && { maxZoom: 18 }),
+          })
         }
       }
     }
@@ -167,6 +185,14 @@ const EditPage = () => {
   const [viewState, setViewState] = useState<ViewState | null>(null)
   const sourceMapRef = useRef<L.Map | null>(null)
   const ignoreFromRef = useRef<L.Map | null>(null)
+  const formCellRef = useRef<HTMLDivElement>(null)
+
+  const initialZoom =
+    typeof window !== 'undefined' && window.innerWidth <= 768 ? 13 : 15
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [currentIndex])
 
   const handleViewChange = useCallback((map: L.Map, lat: number, lng: number, zoom: number) => {
     if (map === ignoreFromRef.current) {
@@ -391,7 +417,7 @@ const EditPage = () => {
         <div className="map-cell map-top-left">
           <MapContainer
             center={[55.7558, 37.6173]}
-            zoom={15}
+            zoom={initialZoom}
             maxZoom={25}
             style={{ height: '100%', width: '100%' }}
           >
@@ -407,13 +433,14 @@ const EditPage = () => {
               onViewChange={handleViewChange}
               ignoreFromRef={ignoreFromRef}
             />
+            <MapResizeFix />
             <ObjectOutline object={currentObject} />
           </MapContainer>
         </div>
         <div className="map-cell map-top-right">
           <MapContainer
             center={[55.7558, 37.6173]}
-            zoom={15}
+            zoom={initialZoom}
             maxZoom={25}
             style={{ height: '100%', width: '100%' }}
           >
@@ -435,7 +462,7 @@ const EditPage = () => {
         <div className="map-cell map-bottom-left">
           <MapContainer
             center={[55.7558, 37.6173]}
-            zoom={15}
+            zoom={initialZoom}
             maxZoom={25}
             style={{ height: '100%', width: '100%' }}
           >
@@ -454,7 +481,15 @@ const EditPage = () => {
             <ObjectOutline object={currentObject} />
           </MapContainer>
         </div>
-        <div className="form-cell">
+        <button
+          type="button"
+          className="scroll-to-form-btn"
+          onClick={() => formCellRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          aria-label="Проскроллить к форме"
+        >
+          К форме
+        </button>
+        <div className="form-cell" ref={formCellRef}>
           <div className="sport-form">
             <h3>Выберите значение тега sport</h3>
             <div className="sport-checkboxes">

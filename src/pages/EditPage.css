@@ -181,3 +181,106 @@
   font-size: 18px;
   color: #666;
 }
+
+.scroll-to-form-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .edit-page {
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .edit-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .edit-header h2 {
+    font-size: 1.1rem;
+    width: 100%;
+  }
+
+  .edit-info {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .edit-info .edit-timestamp {
+    display: block;
+    width: 100%;
+  }
+
+  .edit-grid {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .map-cell {
+    display: block;
+    height: 26vh;
+    height: 26dvh;
+    min-height: 160px;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .map-cell .leaflet-container {
+    height: 100% !important;
+  }
+
+  .form-cell {
+    flex: 1 1 auto;
+    padding: 1rem;
+    min-height: 0;
+  }
+
+  .sport-checkboxes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-buttons {
+    flex-direction: column;
+  }
+
+  .confirm-button,
+  .skip-button,
+  .finish-button {
+    width: 100%;
+  }
+
+  .scroll-to-form-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+    right: 1rem;
+    z-index: 1000;
+    height: 48px;
+    padding: 0 1.25rem;
+    border: none;
+    border-radius: 24px;
+    background: #2196F3;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .scroll-to-form-btn:hover {
+    background: #1976D2;
+  }
+
+  .scroll-to-form-btn:active {
+    transform: scale(0.96);
+  }
+}

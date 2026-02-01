@@ -25,6 +25,11 @@
 .map-container-wrapper {
   flex: 1;
   position: relative;
+  min-height: 0;
+}
+
+.map-container-wrapper .leaflet-container {
+  height: 100%;
 }
 
 .map-search-controls {
@@ -59,4 +64,46 @@
 .confirm-button:disabled {
   background: #ccc;
   cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .map-search-page {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .map-container-wrapper {
+    min-height: 50dvh;
+  }
+
+  .map-search-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .map-search-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .user-info {
+    font-size: 0.9rem;
+  }
+
+  .map-search-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .map-search-controls p {
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  .map-search-controls .confirm-button {
+    width: 100%;
+  }
 }

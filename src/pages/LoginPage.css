@@ -62,3 +62,27 @@
 .login-info a:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 1.25rem;
+    margin: 1rem;
+  }
+
+  .login-container h1 {
+    font-size: 1.25rem;
+  }
+
+  .login-container p {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .login-info {
+    font-size: 13px;
+  }
+
+  .login-info ol {
+    margin-left: 1.25rem;
+  }
+}
