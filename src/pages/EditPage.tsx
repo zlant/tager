@@ -202,7 +202,8 @@ const EditPage = () => {
       return
     }
 
-    setChanges((prev) => [...prev, { object: currentObject!, sport: sportValue }])
+    const newChanges = [...changes, { object: currentObject!, sport: sportValue }]
+    setChanges(newChanges)
     setSelectedSports([])
     setCustomSport('')
 
@@ -211,7 +212,7 @@ const EditPage = () => {
       setCurrentIndex(nextIndex)
       sessionStorage.setItem('current_index', nextIndex.toString())
     } else {
-      handleFinish()
+      handleFinish(newChanges)
     }
   }
 
@@ -233,8 +234,9 @@ const EditPage = () => {
     }
   }
 
-  const handleFinish = async () => {
-    if (changes.length === 0) {
+  const handleFinish = async (overrideChanges?: Array<{ object: OSMObject; sport: string }>) => {
+    const changesToSave = overrideChanges ?? changes
+    if (changesToSave.length === 0) {
       alert('Нет изменений для сохранения')
       return
     }
@@ -243,11 +245,11 @@ const EditPage = () => {
 
     try {
       const changesetId = await createChangeset()
-      const osmChangeXml = generateOSMChangeXML(changes, changesetId)
+      const osmChangeXml = generateOSMChangeXML(changesToSave, changesetId)
       await uploadChangesToOSM(changesetId, osmChangeXml)
       await closeChangeset(changesetId)
 
-      alert(`Изменения сохранены в OSM! Обработано объектов: ${changes.length}`)
+      alert(`Изменения сохранены в OSM! Обработано объектов: ${changesToSave.length}`)
       navigate('/search')
     } catch (error) {
       console.error('Error saving changes:', error)
@@ -478,7 +480,7 @@ const EditPage = () => {
                 Пропустить
               </button>
               <button
-                onClick={handleFinish}
+                onClick={() => handleFinish()}
                 disabled={isSubmitting}
                 className="finish-button"
               >
