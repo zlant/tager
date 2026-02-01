@@ -372,6 +372,11 @@ const EditPage = () => {
           <span>
             Объект {currentIndex + 1} из {objects.length}
           </span>
+          {currentObject.json.timestamp && (
+            <span className="edit-timestamp" title={currentObject.json.timestamp}>
+              Изменён: {new Date(currentObject.json.timestamp).toLocaleString()}
+            </span>
+          )}
           <a
             href={`https://www.openstreetmap.org/${currentObject.json.type}/${currentObject.json.id}`}
             target="_blank"

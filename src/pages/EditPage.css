@@ -34,6 +34,11 @@
   text-decoration: underline;
 }
 
+.edit-info .edit-timestamp {
+  color: #888;
+  font-size: 0.9rem;
+}
+
 .edit-grid {
   flex: 1;
   display: grid;
