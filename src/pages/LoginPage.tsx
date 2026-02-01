@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { auth, getAccessToken } from '../utils/osmAuth'
+import { parseOsmUserXml } from '../utils/parseOsmUser'
+import { OSM_USER_URL } from '../constants'
 import './LoginPage.css'
-
-const OSM_USER_URL = 'https://api.openstreetmap.org/api/0.6/user/details'
 
 const LoginPage = () => {
   const navigate = useNavigate()
@@ -40,19 +40,7 @@ const LoginPage = () => {
       }
 
       const userXml = await userResponse.text()
-      const parser = new DOMParser()
-      const doc = parser.parseFromString(userXml, 'text/xml')
-      const userElement = doc.querySelector('user')
-
-      if (!userElement) {
-        throw new Error('User data not found')
-      }
-
-      const user = {
-        id: parseInt(userElement.getAttribute('id') || '0'),
-        username: userElement.getAttribute('display_name') || '',
-        displayName: userElement.getAttribute('display_name') || '',
-      }
+      const user = parseOsmUserXml(userXml)
 
       const token = getAccessToken()
       if (!token) {

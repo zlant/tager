@@ -1,11 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { auth, getAccessToken } from '../utils/osmAuth'
-
-interface User {
-  id: number
-  username: string
-  displayName: string
-}
+import type { User } from '../types'
+import { STORAGE_KEYS } from '../constants'
 
 interface AuthContextType {
   user: User | null
@@ -30,30 +26,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [token, setToken] = useState<string | null>(null)
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('osm_user')
+    const storedUser = localStorage.getItem(STORAGE_KEYS.OSM_USER)
     const storedToken = getAccessToken()
-    
+
     if (storedUser && storedToken && auth.authenticated()) {
       setUser(JSON.parse(storedUser))
       setToken(storedToken)
     } else if (!auth.authenticated()) {
       setUser(null)
       setToken(null)
-      localStorage.removeItem('osm_user')
+      localStorage.removeItem(STORAGE_KEYS.OSM_USER)
     }
   }, [])
 
   const login = (userData: User, userToken: string) => {
     setUser(userData)
     setToken(userToken)
-    localStorage.setItem('osm_user', JSON.stringify(userData))
+    localStorage.setItem(STORAGE_KEYS.OSM_USER, JSON.stringify(userData))
   }
 
   const logout = () => {
     auth.logout()
     setUser(null)
     setToken(null)
-    localStorage.removeItem('osm_user')
+    localStorage.removeItem(STORAGE_KEYS.OSM_USER)
   }
 
   return (

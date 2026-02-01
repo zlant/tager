@@ -1,6 +1,6 @@
 import { osmAuth } from 'osm-auth'
 
-const OSM_OAUTH_CLIENT_ID = import.meta.env.VITE_OSM_OAUTH_CLIENT_ID || 'JMW3au0C2crWBCGQOFbjwes-ESXkiuBTdtWTlYSBOUA'
+const OSM_OAUTH_CLIENT_ID = import.meta.env.VITE_OSM_OAUTH_CLIENT_ID ?? ''
 const OSM_OAUTH_REDIRECT_URI = import.meta.env.VITE_OSM_OAUTH_REDIRECT_URI ||
   `${window.location.origin}${import.meta.env.BASE_URL}login`
 const OSM_URL = 'https://www.openstreetmap.org'

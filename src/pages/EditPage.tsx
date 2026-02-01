@@ -1,256 +1,35 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, useMap } from 'react-leaflet'
-import L from 'leaflet'
+import { MapContainer, TileLayer } from 'react-leaflet'
 import { useAuth } from '../contexts/AuthContext'
-import type { EditMode } from './MapSearchPage'
-import packageJson from '../../package.json'
+import type L from 'leaflet'
+import { useEditSession } from '../hooks/useOverpassSearch'
+import { saveChangesToOSM } from '../api/osm'
+import { MapResizeFix, MapSyncView, ObjectOutline } from '../components/map'
+import { EditHeader, TagForm } from '../components/edit'
+import type { PendingChange, TagKeyForMode } from '../types'
+import { DEFAULT_MAP_CENTER } from '../constants'
 import './EditPage.css'
 
-const EDIT_MODE_KEY = 'edit_mode'
-
-const EDITOR_TAG = `tager ${packageJson.version}`
-
-delete (L.Icon.Default.prototype as any)._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-})
-
-interface OverpassElement {
-  type: 'node' | 'way' | 'relation'
-  id: number
-  version?: number
-  changeset?: number
-  timestamp?: string
-  lat?: number
-  lon?: number
-  nodes?: number[]
-  members?: Array<{ type: string; ref: number; role?: string }>
-  tags?: Record<string, string>
-}
-
-interface OSMObject {
-  id: string
-  type: string
-  version: string
-  changeset: string
-  timestamp: string
-  json: OverpassElement
-  fullJson: OverpassElement[]
-}
-
-const POPULAR_SPORTS = [
-  'football',
-  'basketball',
-  'tennis',
-  'volleyball',
-  'soccer',
-  'baseball',
-  'rugby',
-  'ice_hockey',
-  'badminton',
-  'table_tennis',
-  'handball',
-  'futsal',
-  'beachvolleyball',
-  'american_football',
-  'cricket',
-]
-
-const POPULAR_RESIDENTIAL = [
-  'apartments',
-  'houses',
-  'detached',
-  'terrace',
-  'duplex',
-  'urban',
-  'rural',
-  'dormitory',
-]
-
-interface ViewState {
-  lat: number
-  lng: number
-  zoom: number
-}
-
-interface MapSyncViewProps {
-  viewState: ViewState | null
-  sourceMapRef: React.MutableRefObject<L.Map | null>
-  onViewChange: (map: L.Map, lat: number, lng: number, zoom: number) => void
-  ignoreFromRef: React.MutableRefObject<L.Map | null>
-}
-
-const MapSyncView: React.FC<MapSyncViewProps> = ({
-  viewState,
-  sourceMapRef,
-  onViewChange,
-  ignoreFromRef,
-}) => {
-  const map = useMap()
-
-  useEffect(() => {
-    if (!viewState || sourceMapRef.current === map) return
-    ignoreFromRef.current = map
-    map.setView([viewState.lat, viewState.lng], viewState.zoom, { animate: false })
-  }, [map, viewState, sourceMapRef, ignoreFromRef])
-
-  useEffect(() => {
-    const handler = () => {
-      if (map === ignoreFromRef.current) {
-        ignoreFromRef.current = null
-        return
-      }
-      const center = map.getCenter()
-      onViewChange(map, center.lat, center.lng, map.getZoom())
-    }
-    map.on('moveend', handler)
-    return () => {
-      map.off('moveend', handler)
-    }
-  }, [map, onViewChange, ignoreFromRef])
-
-  return null
-}
-
-const MapResizeFix: React.FC = () => {
-  const map = useMap()
-  useEffect(() => {
-    const fix = () => map.invalidateSize()
-    const t = setTimeout(fix, 100)
-    window.addEventListener('resize', fix)
-    return () => {
-      clearTimeout(t)
-      window.removeEventListener('resize', fix)
-    }
-  }, [map])
-  return null
-}
-
-interface ObjectOutlineProps {
-  object: OSMObject | null
-}
-
-const ObjectOutline: React.FC<ObjectOutlineProps> = ({ object }) => {
-  const map = useMap()
-  const layerRef = useRef<L.LayerGroup | null>(null)
-
-  useEffect(() => {
-    if (!object) return
-
-    if (layerRef.current) {
-      map.removeLayer(layerRef.current)
-    }
-
-    const el = object.json
-    const layerGroup = L.layerGroup()
-
-    const nodeMap = new Map(
-      object.fullJson.filter((e) => e.type === 'node').map((n) => [n.id, n])
-    )
-
-    const addPolygonForCoords = (coords: L.LatLng[]) => {
-      if (coords.length === 0) return null
-      const polygon = L.polygon(coords, {
-        color: '#3388ff',
-        weight: 1,
-        fillOpacity: 0,
-      })
-      layerGroup.addLayer(polygon)
-      return polygon
-    }
-
-    if (el.type === 'way' && el.nodes && object.fullJson.length > 0) {
-      const coords: L.LatLng[] = []
-      for (const ref of el.nodes) {
-        const node = nodeMap.get(ref)
-        if (node && node.lat != null && node.lon != null) {
-          coords.push(L.latLng(node.lat, node.lon))
-        }
-      }
-      const polygon = addPolygonForCoords(coords)
-      if (polygon && coords.length > 1) {
-        const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
-        map.fitBounds(polygon.getBounds(), {
-          padding: [20, 20],
-          ...(isMobile && { maxZoom: 18 }),
-        })
-      }
-    }
-
-    if (el.type === 'relation' && el.members && object.fullJson.length > 0) {
-      const wayMap = new Map(
-        object.fullJson.filter((e) => e.type === 'way').map((w) => [w.id, w])
-      )
-      let firstBounds: L.LatLngBounds | null = null
-      for (const member of el.members) {
-        if (member.type !== 'way') continue
-        const way = wayMap.get(member.ref)
-        if (!way?.nodes) continue
-        const coords: L.LatLng[] = []
-        for (const ref of way.nodes) {
-          const node = nodeMap.get(ref)
-          if (node && node.lat != null && node.lon != null) {
-            coords.push(L.latLng(node.lat, node.lon))
-          }
-        }
-        const polygon = addPolygonForCoords(coords)
-        if (polygon) {
-          const b = polygon.getBounds()
-          if (!firstBounds) firstBounds = b
-          else firstBounds.extend(b)
-        }
-      }
-      if (firstBounds) {
-        const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
-        map.fitBounds(firstBounds, {
-          padding: [20, 20],
-          ...(isMobile && { maxZoom: 18 }),
-        })
-      }
-    }
-
-    layerGroup.addTo(map)
-    layerRef.current = layerGroup
-
-    return () => {
-      if (layerRef.current) {
-        map.removeLayer(layerRef.current)
-      }
-    }
-  }, [object, map])
-
-  return null
-}
+const initialZoom =
+  typeof window !== 'undefined' && window.innerWidth <= 768 ? 13 : 15
 
 const EditPage = () => {
   const navigate = useNavigate()
-  const { user, token } = useAuth()
-  const [objects, setObjects] = useState<OSMObject[]>([])
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [editMode, setEditMode] = useState<EditMode>('pitch')
+  const { token } = useAuth()
+  const session = useEditSession()
+
   const [selectedSports, setSelectedSports] = useState<string[]>([])
   const [customSport, setCustomSport] = useState('')
   const [selectedResidential, setSelectedResidential] = useState<string[]>([])
   const [customResidential, setCustomResidential] = useState('')
-  const [changes, setChanges] = useState<
-    Array<{ object: OSMObject; tagKey: 'sport' | 'residential'; tagValue: string }>
-  >([])
+  const [changes, setChanges] = useState<PendingChange[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const [viewState, setViewState] = useState<ViewState | null>(null)
+  const [viewState, setViewState] = useState<{ lat: number; lng: number; zoom: number } | null>(null)
   const sourceMapRef = useRef<L.Map | null>(null)
   const ignoreFromRef = useRef<L.Map | null>(null)
   const formCellRef = useRef<HTMLDivElement>(null)
-
-  const initialZoom =
-    typeof window !== 'undefined' && window.innerWidth <= 768 ? 13 : 15
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [currentIndex])
 
   const handleViewChange = useCallback((map: L.Map, lat: number, lng: number, zoom: number) => {
     if (map === ignoreFromRef.current) {
@@ -262,31 +41,10 @@ const EditPage = () => {
   }, [])
 
   useEffect(() => {
-    const storedObjects = sessionStorage.getItem('osm_objects')
-    const storedIndex = sessionStorage.getItem('current_index')
-    const storedFullJson = sessionStorage.getItem('osm_full_json')
-    const storedMode = sessionStorage.getItem(EDIT_MODE_KEY) as EditMode | null
-
-    if (storedMode === 'pitch' || storedMode === 'residential') {
-      setEditMode(storedMode)
+    if (session?.currentIndex != null) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
-    if (storedObjects) {
-      try {
-        const parsed = JSON.parse(storedObjects) as OSMObject[]
-        const fullJson: OverpassElement[] = storedFullJson ? JSON.parse(storedFullJson) : []
-        setObjects(parsed.map((o) => ({ ...o, fullJson })))
-      } catch {
-        setObjects([])
-      }
-    }
-    if (storedIndex) {
-      setCurrentIndex(parseInt(storedIndex))
-    }
-  }, [])
-
-  const currentObject = objects[currentIndex] || null
-
-  const tagKey: 'sport' | 'residential' = editMode === 'pitch' ? 'sport' : 'residential'
+  }, [session?.currentIndex])
 
   const handleSportToggle = (sport: string) => {
     setSelectedSports((prev) =>
@@ -300,32 +58,37 @@ const EditPage = () => {
     )
   }
 
+  const tagKey: TagKeyForMode = session?.editMode === 'pitch' ? 'sport' : 'residential'
+
   const handleConfirm = () => {
+    if (!session?.currentObject) return
     const tagValue =
-      editMode === 'pitch'
+      session.editMode === 'pitch'
         ? customSport.trim() || selectedSports.join(';')
         : customResidential.trim() || selectedResidential.join(';')
 
     if (!tagValue) {
       alert(
-        editMode === 'pitch'
+        session.editMode === 'pitch'
           ? 'Выберите или введите значение для тега sport'
           : 'Выберите или введите значение для тега residential'
       )
       return
     }
 
-    const newChanges = [...changes, { object: currentObject!, tagKey, tagValue }]
+    const newChanges: PendingChange[] = [
+      ...changes,
+      { object: session.currentObject, tagKey, tagValue },
+    ]
     setChanges(newChanges)
     setSelectedSports([])
     setCustomSport('')
     setSelectedResidential([])
     setCustomResidential('')
 
-    if (currentIndex < objects.length - 1) {
-      const nextIndex = currentIndex + 1
-      setCurrentIndex(nextIndex)
-      sessionStorage.setItem('current_index', nextIndex.toString())
+    if (session.currentIndex < session.objects.length - 1) {
+      const nextIndex = session.currentIndex + 1
+      session.setCurrentIndex(nextIndex)
     } else {
       handleFinish(newChanges)
     }
@@ -337,10 +100,9 @@ const EditPage = () => {
     setSelectedResidential([])
     setCustomResidential('')
 
-    if (currentIndex < objects.length - 1) {
-      const nextIndex = currentIndex + 1
-      setCurrentIndex(nextIndex)
-      sessionStorage.setItem('current_index', nextIndex.toString())
+    if (!session) return
+    if (session.currentIndex < session.objects.length - 1) {
+      session.setCurrentIndex(session.currentIndex + 1)
     } else {
       if (changes.length > 0) {
         handleFinish()
@@ -351,23 +113,17 @@ const EditPage = () => {
     }
   }
 
-  const handleFinish = async (
-    overrideChanges?: Array<{ object: OSMObject; tagKey: 'sport' | 'residential'; tagValue: string }>
-  ) => {
+  const handleFinish = async (overrideChanges?: PendingChange[]) => {
     const changesToSave = overrideChanges ?? changes
     if (changesToSave.length === 0) {
       alert('Нет изменений для сохранения')
       return
     }
+    if (!token || !session) return
 
     setIsSubmitting(true)
-
     try {
-      const changesetId = await createChangeset()
-      const osmChangeXml = generateOSMChangeXML(changesToSave, changesetId)
-      await uploadChangesToOSM(changesetId, osmChangeXml)
-      await closeChangeset(changesetId)
-
+      await saveChangesToOSM(changesToSave, session.editMode, token)
       alert(`Изменения сохранены в OSM! Обработано объектов: ${changesToSave.length}`)
       navigate('/search')
     } catch (error) {
@@ -378,116 +134,15 @@ const EditPage = () => {
     }
   }
 
-  const createChangeset = async (): Promise<string> => {
-    const comment =
-      editMode === 'pitch'
-        ? 'Добавление тега sport для объектов leisure=pitch'
-        : 'Добавление тега residential для объектов landuse=residential'
-    const changesetXml = `<?xml version="1.0" encoding="UTF-8"?>
-<osm>
-  <changeset>
-    <tag k="created_by" v="${EDITOR_TAG}"/>
-    <tag k="comment" v="${comment}"/>
-  </changeset>
-</osm>`
-
-    const response = await fetch('https://api.openstreetmap.org/api/0.6/changeset/create', {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'text/xml',
-      },
-      body: changesetXml,
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to create changeset')
-    }
-
-    return await response.text()
-  }
-
-  const closeChangeset = async (changesetId: string) => {
-    await fetch(`https://api.openstreetmap.org/api/0.6/changeset/${changesetId}/close`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-  }
-
-  const escapeXml = (s: string) =>
-    String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-
-  const elementToOsmXml = (
-    el: OverpassElement,
-    changesetId: string,
-    tagKey: string,
-    tagValue: string
-  ): string => {
-    const tags = { ...el.tags, [tagKey]: tagValue }
-    const v = el.version ?? 1
-    const ts = el.timestamp ?? ''
-    if (el.type === 'way') {
-      let out = `  <way id="${el.id}" version="${v}" changeset="${changesetId}" timestamp="${ts}">\n`
-      for (const ref of el.nodes ?? []) out += `    <nd ref="${ref}"/>\n`
-      for (const [k, v] of Object.entries(tags)) out += `    <tag k="${escapeXml(k)}" v="${escapeXml(v)}"/>\n`
-      out += '  </way>'
-      return out
-    }
-    if (el.type === 'relation') {
-      let out = `  <relation id="${el.id}" version="${v}" changeset="${changesetId}" timestamp="${ts}">\n`
-      for (const m of el.members ?? []) out += `    <member type="${m.type}" ref="${m.ref}" role="${m.role ?? ''}"/>\n`
-      for (const [k, v] of Object.entries(tags)) out += `    <tag k="${escapeXml(k)}" v="${escapeXml(v)}"/>\n`
-      out += '  </relation>'
-      return out
-    }
-    return ''
-  }
-
-  const generateOSMChangeXML = (
-    changes: Array<{ object: OSMObject; tagKey: 'sport' | 'residential'; tagValue: string }>,
-    changesetId: string
-  ): string => {
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<osmChange version="0.6" generator="${EDITOR_TAG}">
-  <modify>
-`
-    for (const change of changes) {
-      const part = elementToOsmXml(
-        change.object.json,
-        changesetId,
-        change.tagKey,
-        change.tagValue
-      )
-      if (part) xml += part + '\n'
-    }
-    xml += `  </modify>
-</osmChange>`
-    return xml
-  }
-
-  const uploadChangesToOSM = async (changesetId: string, osmChangeXml: string) => {
-    const response = await fetch(
-      `https://api.openstreetmap.org/api/0.6/changeset/${changesetId}/upload`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/xml',
-        },
-        body: osmChangeXml,
-      }
+  if (!session) {
+    return (
+      <div className="edit-page">
+        <div className="no-objects">Объекты не найдены</div>
+      </div>
     )
-    if (!response.ok) {
-      const text = await response.text()
-      throw new Error(text || `Upload failed: ${response.status}`)
-    }
   }
+
+  const { objects, currentIndex, editMode, currentObject, setCurrentIndex } = session
 
   if (!currentObject) {
     return (
@@ -499,34 +154,15 @@ const EditPage = () => {
 
   return (
     <div className="edit-page">
-      <div className="edit-header">
-        <h2>Редактирование объектов</h2>
-        <div className="edit-info">
-          <span>
-            Объект {currentIndex + 1} из {objects.length}
-          </span>
-          <span className="edit-object-type">
-            {currentObject.json.type}
-          </span>
-          {currentObject.json.timestamp && (
-            <span className="edit-timestamp" title={currentObject.json.timestamp}>
-              Изменён: {new Date(currentObject.json.timestamp).toLocaleString()}
-            </span>
-          )}
-          <a
-            href={`https://www.openstreetmap.org/${currentObject.json.type}/${currentObject.json.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="osm-link"
-          >
-            Открыть на osm.org
-          </a>
-        </div>
-      </div>
+      <EditHeader
+        currentIndex={currentIndex}
+        totalCount={objects.length}
+        object={currentObject}
+      />
       <div className="edit-grid">
         <div className="map-cell map-top-left">
           <MapContainer
-            center={[55.7558, 37.6173]}
+            center={DEFAULT_MAP_CENTER}
             zoom={initialZoom}
             maxZoom={25}
             style={{ height: '100%', width: '100%' }}
@@ -549,7 +185,7 @@ const EditPage = () => {
         </div>
         <div className="map-cell map-top-right">
           <MapContainer
-            center={[55.7558, 37.6173]}
+            center={DEFAULT_MAP_CENTER}
             zoom={initialZoom}
             maxZoom={25}
             style={{ height: '100%', width: '100%' }}
@@ -571,7 +207,7 @@ const EditPage = () => {
         </div>
         <div className="map-cell map-bottom-left">
           <MapContainer
-            center={[55.7558, 37.6173]}
+            center={DEFAULT_MAP_CENTER}
             zoom={initialZoom}
             maxZoom={25}
             style={{ height: '100%', width: '100%' }}
@@ -600,86 +236,21 @@ const EditPage = () => {
           К форме
         </button>
         <div className="form-cell" ref={formCellRef}>
-          <div className="sport-form">
-            {editMode === 'pitch' ? (
-              <>
-                <h3>Выберите значение тега sport</h3>
-                <div className="sport-checkboxes">
-                  {POPULAR_SPORTS.map((sport) => (
-                    <label key={sport} className="sport-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={selectedSports.includes(sport)}
-                        onChange={() => handleSportToggle(sport)}
-                      />
-                      <span>{sport}</span>
-                    </label>
-                  ))}
-                </div>
-                <div className="custom-sport-input">
-                  <label>
-                    Или введите свое значение:
-                    <input
-                      type="text"
-                      value={customSport}
-                      onChange={(e) => setCustomSport(e.target.value)}
-                      placeholder="например: football;basketball"
-                    />
-                  </label>
-                </div>
-              </>
-            ) : (
-              <>
-                <h3>Выберите значение тега residential</h3>
-                <div className="sport-checkboxes">
-                  {POPULAR_RESIDENTIAL.map((value) => (
-                    <label key={value} className="sport-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={selectedResidential.includes(value)}
-                        onChange={() => handleResidentialToggle(value)}
-                      />
-                      <span>{value}</span>
-                    </label>
-                  ))}
-                </div>
-                <div className="custom-sport-input">
-                  <label>
-                    Или введите свое значение:
-                    <input
-                      type="text"
-                      value={customResidential}
-                      onChange={(e) => setCustomResidential(e.target.value)}
-                      placeholder="например: apartments"
-                    />
-                  </label>
-                </div>
-              </>
-            )}
-            <div className="form-buttons">
-              <button
-                onClick={handleConfirm}
-                disabled={isSubmitting}
-                className="confirm-button"
-              >
-                Подтвердить и продолжить
-              </button>
-              <button
-                onClick={handleSkip}
-                disabled={isSubmitting}
-                className="skip-button"
-              >
-                Пропустить
-              </button>
-              <button
-                onClick={() => handleFinish()}
-                disabled={isSubmitting}
-                className="finish-button"
-              >
-                Завершить
-              </button>
-            </div>
-          </div>
+          <TagForm
+            editMode={editMode}
+            selectedSports={selectedSports}
+            customSport={customSport}
+            selectedResidential={selectedResidential}
+            customResidential={customResidential}
+            onSportToggle={handleSportToggle}
+            onResidentialToggle={handleResidentialToggle}
+            onCustomSportChange={setCustomSport}
+            onCustomResidentialChange={setCustomResidential}
+            onConfirm={handleConfirm}
+            onSkip={handleSkip}
+            onFinish={() => handleFinish()}
+            isSubmitting={isSubmitting}
+          />
         </div>
       </div>
     </div>
