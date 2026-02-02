@@ -28,6 +28,6 @@ export const POPULAR_SPORTS = [
 ] as const
 
 export const POPULAR_RESIDENTIAL = [
-  'apartments', 'houses', 'detached', 'terrace', 'duplex', 'urban',
-  'rural', 'dormitory',
+  'urban', 'rural', 'apartments', 'houses', 'detached', 'terrace',
+  'duplex', 'dormitory', 'single_family'
 ] as const
