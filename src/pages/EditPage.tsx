@@ -4,6 +4,7 @@ import { MapContainer, TileLayer } from 'react-leaflet'
 import { useAuth } from '../contexts/AuthContext'
 import type L from 'leaflet'
 import { useEditSession } from '../hooks/useOverpassSearch'
+import { useEsriMaxZoom } from '../hooks/useEsriMaxZoom'
 import { saveChangesToOSM } from '../api/osm'
 import { MapResizeFix, MapSyncView, ObjectOutline } from '../components/map'
 import { EditHeader, TagForm } from '../components/edit'
@@ -46,6 +47,12 @@ const EditPage = () => {
   const sourceMapRef = useRef<L.Map | null>(null)
   const ignoreFromRef = useRef<L.Map | null>(null)
   const formCellRef = useRef<HTMLDivElement>(null)
+
+  const { maxZoom: esriMaxZoom } = useEsriMaxZoom(
+    viewState
+      ? { lat: viewState.lat, lng: viewState.lng }
+      : { lat: DEFAULT_MAP_CENTER[0], lng: DEFAULT_MAP_CENTER[1] }
+  )
 
   const handleViewChange = useCallback((map: L.Map, lat: number, lng: number, zoom: number) => {
     if (map === ignoreFromRef.current) {
@@ -261,7 +268,7 @@ const EditPage = () => {
             <TileLayer
               attribution='&copy; Esri'
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              maxNativeZoom={19}
+              maxNativeZoom={esriMaxZoom}
               maxZoom={25}
             />
             <MapSyncView
