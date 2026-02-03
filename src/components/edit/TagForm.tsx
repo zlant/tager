@@ -5,10 +5,10 @@ interface TagFormProps {
   editMode: EditMode
   selectedSports: string[]
   customSport: string
-  selectedResidential: string[]
+  selectedResidential: string
   customResidential: string
   onSportToggle: (sport: string) => void
-  onResidentialToggle: (value: string) => void
+  onResidentialSelect: (value: string) => void
   onCustomSportChange: (value: string) => void
   onCustomResidentialChange: (value: string) => void
   onConfirm: () => void
@@ -24,7 +24,7 @@ export const TagForm: React.FC<TagFormProps> = ({
   selectedResidential,
   customResidential,
   onSportToggle,
-  onResidentialToggle,
+  onResidentialSelect,
   onCustomSportChange,
   onCustomResidentialChange,
   onConfirm,
@@ -67,9 +67,11 @@ export const TagForm: React.FC<TagFormProps> = ({
           {POPULAR_RESIDENTIAL.map((value) => (
             <label key={value} className="sport-checkbox">
               <input
-                type="checkbox"
-                checked={selectedResidential.includes(value)}
-                onChange={() => onResidentialToggle(value)}
+                type="radio"
+                name="residential"
+                value={value}
+                checked={selectedResidential === value}
+                onChange={() => onResidentialSelect(value)}
               />
               <span>{value}</span>
             </label>

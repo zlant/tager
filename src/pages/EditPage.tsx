@@ -21,7 +21,7 @@ const EditPage = () => {
 
   const [selectedSports, setSelectedSports] = useState<string[]>([])
   const [customSport, setCustomSport] = useState('')
-  const [selectedResidential, setSelectedResidential] = useState<string[]>([])
+  const [selectedResidential, setSelectedResidential] = useState<string>('')
   const [customResidential, setCustomResidential] = useState('')
   const [changes, setChanges] = useState<PendingChange[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -52,10 +52,8 @@ const EditPage = () => {
     )
   }
 
-  const handleResidentialToggle = (value: string) => {
-    setSelectedResidential((prev) =>
-      prev.includes(value) ? prev.filter((s) => s !== value) : [...prev, value]
-    )
+  const handleResidentialSelect = (value: string) => {
+    setSelectedResidential((prev) => (prev === value ? '' : value))
   }
 
   const tagKey: TagKeyForMode = session?.editMode === 'pitch' ? 'sport' : 'residential'
@@ -65,7 +63,7 @@ const EditPage = () => {
     const tagValue =
       session.editMode === 'pitch'
         ? customSport.trim() || selectedSports.join(';')
-        : customResidential.trim() || selectedResidential.join(';')
+        : customResidential.trim() || selectedResidential
 
     if (!tagValue) {
       alert(
@@ -83,7 +81,7 @@ const EditPage = () => {
     setChanges(newChanges)
     setSelectedSports([])
     setCustomSport('')
-    setSelectedResidential([])
+    setSelectedResidential('')
     setCustomResidential('')
 
     if (session.currentIndex < session.objects.length - 1) {
@@ -97,7 +95,7 @@ const EditPage = () => {
   const handleSkip = () => {
     setSelectedSports([])
     setCustomSport('')
-    setSelectedResidential([])
+    setSelectedResidential('')
     setCustomResidential('')
 
     if (!session) return
@@ -243,7 +241,7 @@ const EditPage = () => {
             selectedResidential={selectedResidential}
             customResidential={customResidential}
             onSportToggle={handleSportToggle}
-            onResidentialToggle={handleResidentialToggle}
+            onResidentialSelect={handleResidentialSelect}
             onCustomSportChange={setCustomSport}
             onCustomResidentialChange={setCustomResidential}
             onConfirm={handleConfirm}
