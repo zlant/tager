@@ -22,7 +22,7 @@ export const OSM_API_BASE = 'https://api.openstreetmap.org/api/0.6'
 export const OSM_USER_URL = `${OSM_API_BASE}/user/details`
 
 export const POPULAR_SPORTS = [
-  'football', 'basketball', 'tennis', 'volleyball', 'soccer', 'baseball',
+  'basketball', 'tennis', 'volleyball', 'soccer', 'baseball',
   'rugby', 'ice_hockey', 'badminton', 'table_tennis', 'handball', 'futsal',
   'beachvolleyball', 'american_football', 'cricket',
 ] as const

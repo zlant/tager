@@ -55,7 +55,7 @@ export const TagForm: React.FC<TagFormProps> = ({
               type="text"
               value={customSport}
               onChange={(e) => onCustomSportChange(e.target.value)}
-              placeholder="например: football;basketball"
+              placeholder="например: futsal;basketball"
             />
           </label>
         </div>
