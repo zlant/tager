@@ -19,12 +19,28 @@ const EditPage = () => {
   const { token } = useAuth()
   const session = useEditSession()
 
+  type FormState = {
+    selectedSports: string[]
+    customSport: string
+    selectedResidential: string
+    customResidential: string
+  }
+  const emptyForm: FormState = {
+    selectedSports: [],
+    customSport: '',
+    selectedResidential: '',
+    customResidential: '',
+  }
+
+  const [formStateByObjectId, setFormStateByObjectId] = useState<Record<string, FormState>>({})
   const [selectedSports, setSelectedSports] = useState<string[]>([])
   const [customSport, setCustomSport] = useState('')
   const [selectedResidential, setSelectedResidential] = useState<string>('')
   const [customResidential, setCustomResidential] = useState('')
   const [changes, setChanges] = useState<PendingChange[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const objectKey = (id: string, type: string) => `${type}/${id}`
 
   const [viewState, setViewState] = useState<{ lat: number; lng: number; zoom: number } | null>(null)
   const sourceMapRef = useRef<L.Map | null>(null)
@@ -45,6 +61,30 @@ const EditPage = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }, [session?.currentIndex])
+
+  useEffect(() => {
+    if (!session?.currentObject) return
+    const key = objectKey(session.currentObject.id, session.currentObject.type)
+    const saved = formStateByObjectId[key] ?? emptyForm
+    setSelectedSports(saved.selectedSports)
+    setCustomSport(saved.customSport)
+    setSelectedResidential(saved.selectedResidential)
+    setCustomResidential(saved.customResidential)
+  }, [session?.currentIndex, session?.currentObject?.id, session?.currentObject?.type, formStateByObjectId])
+
+  const saveFormForCurrentObject = useCallback(() => {
+    if (!session?.currentObject) return
+    const key = objectKey(session.currentObject.id, session.currentObject.type)
+    setFormStateByObjectId((prev) => ({
+      ...prev,
+      [key]: {
+        selectedSports,
+        customSport,
+        selectedResidential,
+        customResidential,
+      },
+    }))
+  }, [session?.currentObject, selectedSports, customSport, selectedResidential, customResidential])
 
   const handleSportToggle = (sport: string) => {
     setSelectedSports((prev) =>
@@ -74,6 +114,16 @@ const EditPage = () => {
       return
     }
 
+    const key = objectKey(session.currentObject.id, session.currentObject.type)
+    setFormStateByObjectId((prev) => ({
+      ...prev,
+      [key]: {
+        selectedSports,
+        customSport,
+        selectedResidential,
+        customResidential,
+      },
+    }))
     const newChanges: PendingChange[] = [
       ...changes,
       { object: session.currentObject, tagKey, tagValue },
@@ -93,22 +143,38 @@ const EditPage = () => {
   }
 
   const handleSkip = () => {
+    if (!session?.currentObject) return
+
+    const key = objectKey(session.currentObject.id, session.currentObject.type)
+    setFormStateByObjectId((prev) => {
+      const next = { ...prev }
+      delete next[key]
+      return next
+    })
+    const changesWithoutCurrent = changes.filter(
+      (c) => c.object.id !== session.currentObject!.id || c.object.type !== session.currentObject!.type
+    )
+    setChanges(changesWithoutCurrent)
     setSelectedSports([])
     setCustomSport('')
     setSelectedResidential('')
     setCustomResidential('')
 
-    if (!session) return
     if (session.currentIndex < session.objects.length - 1) {
       session.setCurrentIndex(session.currentIndex + 1)
     } else {
-      if (changes.length > 0) {
-        handleFinish()
+      if (changesWithoutCurrent.length > 0) {
+        handleFinish(changesWithoutCurrent)
       } else {
         alert('Все объекты обработаны. Нет изменений для сохранения.')
         navigate('/search')
       }
     }
+  }
+
+  const resetFormAndGoTo = (index: number) => {
+    saveFormForCurrentObject()
+    session?.setCurrentIndex(index)
   }
 
   const handleFinish = async (overrideChanges?: PendingChange[]) => {
@@ -156,6 +222,10 @@ const EditPage = () => {
         currentIndex={currentIndex}
         totalCount={objects.length}
         object={currentObject}
+        onPrev={() => resetFormAndGoTo(currentIndex - 1)}
+        onNext={() => resetFormAndGoTo(currentIndex + 1)}
+        canGoPrev={currentIndex > 0}
+        canGoNext={currentIndex < objects.length - 1}
       />
       <div className="edit-grid">
         <div className="map-cell map-top-left">
