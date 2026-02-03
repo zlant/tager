@@ -25,11 +25,35 @@ export const OSM_USER_URL = `${OSM_API_BASE}/user/details`
 
 export const POPULAR_SPORTS = [
   'basketball', 'tennis', 'volleyball', 'soccer', 'baseball',
-  'rugby', 'ice_hockey', 'badminton', 'table_tennis', 'handball', 'futsal',
+  'rugby', 'ice_hockey', 'futsal',
   'beachvolleyball', 'american_football', 'cricket',
 ] as const
 
 export const POPULAR_RESIDENTIAL = [
-  'urban', 'rural', 'apartments', 'houses', 'detached', 'terrace',
-  'duplex', 'dormitory', 'single_family'
+  'urban', 'rural', 'apartments', 'detached', 'terrace',
+  'duplex', 'single_family'
 ] as const
+
+export const SPORT_LABELS_RU: Record<string, string> = {
+  basketball: 'Баскетбол',
+  tennis: 'Теннис',
+  volleyball: 'Волейбол',
+  soccer: 'Футбол',
+  baseball: 'Бейсбол',
+  rugby: 'Регби',
+  ice_hockey: 'Хоккей на льду',
+  futsal: 'Мини-футбол',
+  beachvolleyball: 'Пляжный волейбол',
+  american_football: 'Американский футбол',
+  cricket: 'Крикет',
+}
+
+export const RESIDENTIAL_LABELS_RU: Record<string, string> = {
+  urban: 'Городская застройка',
+  rural: 'Сельская местность',
+  apartments: 'Многоквартирные дома',
+  detached: 'Частные дома',
+  terrace: 'Террасная застройка',
+  duplex: 'Двухквартирные дома',
+  single_family: 'Одноквартирные дома',
+}

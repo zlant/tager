@@ -1,5 +1,5 @@
 import type { EditMode } from '../../types'
-import { POPULAR_SPORTS, POPULAR_RESIDENTIAL } from '../../constants'
+import { POPULAR_SPORTS, POPULAR_RESIDENTIAL, SPORT_LABELS_RU, RESIDENTIAL_LABELS_RU } from '../../constants'
 
 interface TagFormProps {
   editMode: EditMode
@@ -44,7 +44,10 @@ export const TagForm: React.FC<TagFormProps> = ({
                 checked={selectedSports.includes(sport)}
                 onChange={() => onSportToggle(sport)}
               />
-              <span>{sport}</span>
+              <span className="tag-label">
+                {SPORT_LABELS_RU[sport] ?? sport}
+                <small>{sport}</small>
+              </span>
             </label>
           ))}
         </div>
@@ -73,7 +76,10 @@ export const TagForm: React.FC<TagFormProps> = ({
                 checked={selectedResidential === value}
                 onChange={() => onResidentialSelect(value)}
               />
-              <span>{value}</span>
+              <span className="tag-label">
+                {RESIDENTIAL_LABELS_RU[value] ?? value}
+                <small>{value}</small>
+              </span>
             </label>
           ))}
         </div>
