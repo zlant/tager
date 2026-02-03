@@ -1,0 +1,85 @@
+{
+  "login": {
+    "title": "OSM Sport Tag Editor",
+    "subtitle": "Приложение для уточнения тега sport для объектов leisure=pitch",
+    "button": "Войти через OpenStreetMap",
+    "authError": "Ошибка авторизации. Попробуйте еще раз.",
+    "requirements": "Для работы приложения необходимо:",
+    "step1": "Зарегистрировать OAuth приложение на",
+    "step2": "Указать Client ID в файле .env"
+  },
+  "mapSearch": {
+    "title": "Поиск местности",
+    "user": "Пользователь",
+    "mode": "Режим",
+    "modePitch": "leisure=pitch без sport",
+    "modeResidential": "landuse=residential без residential",
+    "hint": "Переместите карту к нужной области и нажмите «Загрузить объекты»",
+    "loadButton": "Загрузить объекты",
+    "loading": "Загрузка..."
+  },
+  "edit": {
+    "title": "Редактирование объектов",
+    "prev": "← Назад",
+    "next": "Вперёд →",
+    "prevAria": "Предыдущий объект",
+    "nextAria": "Следующий объект",
+    "changed": "Изменён",
+    "openOsm": "Открыть на osm.org",
+    "noObjects": "Объекты не найдены"
+  },
+  "editPage": {
+    "scrollToForm": "К форме",
+    "scrollToFormAria": "Проскроллить к форме"
+  },
+  "form": {
+    "sportTitle": "Выберите значение тега sport",
+    "residentialTitle": "Выберите значение тега residential",
+    "customLabel": "Или введите свое значение:",
+    "sportPlaceholder": "например: futsal;basketball",
+    "residentialPlaceholder": "например: apartments",
+    "confirm": "Подтвердить и продолжить",
+    "skip": "Пропустить",
+    "finish": "Завершить"
+  },
+  "changeset": {
+    "commentPitch": "Добавление тега sport для объектов leisure=pitch",
+    "commentResidential": "Добавление тега residential для объектов landuse=residential"
+  },
+  "alerts": {
+    "confirmSport": "Выберите или введите значение для тега sport",
+    "confirmResidential": "Выберите или введите значение для тега residential",
+    "noChanges": "Нет изменений для сохранения",
+    "saved": "Изменения сохранены в OSM! Обработано объектов: {{count}}",
+    "saveError": "Ошибка при сохранении изменений",
+    "allProcessed": "Все объекты обработаны. Нет изменений для сохранения.",
+    "authError": "Ошибка авторизации. Попробуйте еще раз.",
+    "noResultsPitch": "В выбранной области не найдено объектов leisure=pitch без тега sport",
+    "noResultsResidential": "В выбранной области не найдено объектов landuse=residential без тега residential",
+    "tooManyObjects": "Слишком много объектов для загрузки. Уменьшите область поиска.",
+    "loadedWithoutGeometry": "Объекты загружены без геометрии площадок (ограничение памяти). Редактирование тегов доступно.",
+    "loadError": "Ошибка при загрузке объектов. Попробуйте еще раз."
+  },
+  "sport": {
+    "basketball": "Баскетбол",
+    "tennis": "Теннис",
+    "volleyball": "Волейбол",
+    "soccer": "Футбол",
+    "baseball": "Бейсбол",
+    "rugby": "Регби",
+    "ice_hockey": "Хоккей на льду",
+    "futsal": "Мини-футбол",
+    "beachvolleyball": "Пляжный волейбол",
+    "american_football": "Американский футбол",
+    "cricket": "Крикет"
+  },
+  "residential": {
+    "urban": "Городская застройка",
+    "rural": "Сельская местность",
+    "apartments": "Многоквартирные дома",
+    "detached": "Частные дома",
+    "terrace": "Террасная застройка",
+    "duplex": "Двухквартирные дома",
+    "single_family": "Одноквартирные дома"
+  }
+}

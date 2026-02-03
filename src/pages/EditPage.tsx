@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { MapContainer, TileLayer } from 'react-leaflet'
 import { useAuth } from '../contexts/AuthContext'
 import type L from 'leaflet'
@@ -17,6 +18,7 @@ const initialZoom =
 
 const EditPage = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { token } = useAuth()
   const session = useEditSession()
 
@@ -115,8 +117,8 @@ const EditPage = () => {
     if (!tagValue) {
       alert(
         session.editMode === 'pitch'
-          ? 'Выберите или введите значение для тега sport'
-          : 'Выберите или введите значение для тега residential'
+          ? t('alerts.confirmSport')
+          : t('alerts.confirmResidential')
       )
       return
     }
@@ -173,7 +175,7 @@ const EditPage = () => {
       if (changesWithoutCurrent.length > 0) {
         handleFinish(changesWithoutCurrent)
       } else {
-        alert('Все объекты обработаны. Нет изменений для сохранения.')
+        alert(t('alerts.allProcessed'))
         navigate('/search')
       }
     }
@@ -187,7 +189,7 @@ const EditPage = () => {
   const handleFinish = async (overrideChanges?: PendingChange[]) => {
     const changesToSave = overrideChanges ?? changes
     if (changesToSave.length === 0) {
-      alert('Нет изменений для сохранения')
+      alert(t('alerts.noChanges'))
       return
     }
     if (!token || !session) return
@@ -195,11 +197,11 @@ const EditPage = () => {
     setIsSubmitting(true)
     try {
       await saveChangesToOSM(changesToSave, session.editMode, token)
-      alert(`Изменения сохранены в OSM! Обработано объектов: ${changesToSave.length}`)
+      alert(t('alerts.saved', { count: changesToSave.length }))
       navigate('/search')
     } catch (error) {
       console.error('Error saving changes:', error)
-      alert('Ошибка при сохранении изменений')
+      alert(t('alerts.saveError'))
     } finally {
       setIsSubmitting(false)
     }
@@ -208,7 +210,7 @@ const EditPage = () => {
   if (!session) {
     return (
       <div className="edit-page">
-        <div className="no-objects">Объекты не найдены</div>
+        <div className="no-objects">{t('edit.noObjects')}</div>
       </div>
     )
   }
@@ -218,7 +220,7 @@ const EditPage = () => {
   if (!currentObject) {
     return (
       <div className="edit-page">
-        <div className="no-objects">Объекты не найдены</div>
+        <div className="no-objects">{t('edit.noObjects')}</div>
       </div>
     )
   }
@@ -306,9 +308,9 @@ const EditPage = () => {
           type="button"
           className="scroll-to-form-btn"
           onClick={() => formCellRef.current?.scrollIntoView({ behavior: 'smooth' })}
-          aria-label="Проскроллить к форме"
+          aria-label={t('editPage.scrollToFormAria')}
         >
-          К форме
+          {t('editPage.scrollToForm')}
         </button>
         <div className="form-cell" ref={formCellRef}>
           <TagForm

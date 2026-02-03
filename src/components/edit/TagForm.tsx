@@ -1,5 +1,6 @@
+import { useTranslation } from 'react-i18next'
 import type { EditMode } from '../../types'
-import { POPULAR_SPORTS, POPULAR_RESIDENTIAL, SPORT_LABELS_RU, RESIDENTIAL_LABELS_RU } from '../../constants'
+import { POPULAR_SPORTS, POPULAR_RESIDENTIAL } from '../../constants'
 
 interface TagFormProps {
   editMode: EditMode
@@ -31,81 +32,84 @@ export const TagForm: React.FC<TagFormProps> = ({
   onSkip,
   onFinish,
   isSubmitting,
-}) => (
-  <div className="sport-form">
-    {editMode === 'pitch' ? (
-      <>
-        <h3>Выберите значение тега sport</h3>
-        <div className="sport-checkboxes">
-          {POPULAR_SPORTS.map((sport) => (
-            <label key={sport} className="sport-checkbox">
+}) => {
+  const { t } = useTranslation()
+  return (
+    <div className="sport-form">
+      {editMode === 'pitch' ? (
+        <>
+          <h3>{t('form.sportTitle')}</h3>
+          <div className="sport-checkboxes">
+            {POPULAR_SPORTS.map((sport) => (
+              <label key={sport} className="sport-checkbox">
+                <input
+                  type="checkbox"
+                  checked={selectedSports.includes(sport)}
+                  onChange={() => onSportToggle(sport)}
+                />
+                <span className="tag-label">
+                  {t(`sport.${sport}`)}
+                  <small>{sport}</small>
+                </span>
+              </label>
+            ))}
+          </div>
+          <div className="custom-sport-input">
+            <label>
+              {t('form.customLabel')}
               <input
-                type="checkbox"
-                checked={selectedSports.includes(sport)}
-                onChange={() => onSportToggle(sport)}
+                type="text"
+                value={customSport}
+                onChange={(e) => onCustomSportChange(e.target.value)}
+                placeholder={t('form.sportPlaceholder')}
               />
-              <span className="tag-label">
-                {SPORT_LABELS_RU[sport] ?? sport}
-                <small>{sport}</small>
-              </span>
             </label>
-          ))}
-        </div>
-        <div className="custom-sport-input">
-          <label>
-            Или введите свое значение:
-            <input
-              type="text"
-              value={customSport}
-              onChange={(e) => onCustomSportChange(e.target.value)}
-              placeholder="например: futsal;basketball"
-            />
-          </label>
-        </div>
-      </>
-    ) : (
-      <>
-        <h3>Выберите значение тега residential</h3>
-        <div className="sport-checkboxes">
-          {POPULAR_RESIDENTIAL.map((value) => (
-            <label key={value} className="sport-checkbox">
+          </div>
+        </>
+      ) : (
+        <>
+          <h3>{t('form.residentialTitle')}</h3>
+          <div className="sport-checkboxes">
+            {POPULAR_RESIDENTIAL.map((value) => (
+              <label key={value} className="sport-checkbox">
+                <input
+                  type="radio"
+                  name="residential"
+                  value={value}
+                  checked={selectedResidential === value}
+                  onChange={() => onResidentialSelect(value)}
+                />
+                <span className="tag-label">
+                  {t(`residential.${value}`)}
+                  <small>{value}</small>
+                </span>
+              </label>
+            ))}
+          </div>
+          <div className="custom-sport-input">
+            <label>
+              {t('form.customLabel')}
               <input
-                type="radio"
-                name="residential"
-                value={value}
-                checked={selectedResidential === value}
-                onChange={() => onResidentialSelect(value)}
+                type="text"
+                value={customResidential}
+                onChange={(e) => onCustomResidentialChange(e.target.value)}
+                placeholder={t('form.residentialPlaceholder')}
               />
-              <span className="tag-label">
-                {RESIDENTIAL_LABELS_RU[value] ?? value}
-                <small>{value}</small>
-              </span>
             </label>
-          ))}
-        </div>
-        <div className="custom-sport-input">
-          <label>
-            Или введите свое значение:
-            <input
-              type="text"
-              value={customResidential}
-              onChange={(e) => onCustomResidentialChange(e.target.value)}
-              placeholder="например: apartments"
-            />
-          </label>
-        </div>
-      </>
-    )}
-    <div className="form-buttons">
-      <button onClick={onConfirm} disabled={isSubmitting} className="confirm-button">
-        Подтвердить и продолжить
-      </button>
-      <button onClick={onSkip} disabled={isSubmitting} className="skip-button">
-        Пропустить
-      </button>
-      <button onClick={onFinish} disabled={isSubmitting} className="finish-button">
-        Завершить
-      </button>
+          </div>
+        </>
+      )}
+      <div className="form-buttons">
+        <button onClick={onConfirm} disabled={isSubmitting} className="confirm-button">
+          {t('form.confirm')}
+        </button>
+        <button onClick={onSkip} disabled={isSubmitting} className="skip-button">
+          {t('form.skip')}
+        </button>
+        <button onClick={onFinish} disabled={isSubmitting} className="finish-button">
+          {t('form.finish')}
+        </button>
+      </div>
     </div>
-  </div>
-)
+  )
+}

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { EditMode, OSMObject } from '../types'
 import type L from 'leaflet'
 import { fetchOverpassElements, getTargetElements } from '../api/overpass'
@@ -9,6 +10,7 @@ import type { OverpassElement } from '../types'
 
 export function useOverpassSearch(editMode: EditMode) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
 
   const runSearch = useCallback(
@@ -20,9 +22,7 @@ export function useOverpassSearch(editMode: EditMode) {
 
         if (targetElements.length === 0) {
           alert(
-            editMode === 'pitch'
-              ? 'В выбранной области не найдено объектов leisure=pitch без тега sport'
-              : 'В выбранной области не найдено объектов landuse=residential без тега residential'
+            editMode === 'pitch' ? t('alerts.noResultsPitch') : t('alerts.noResultsResidential')
           )
           setIsLoading(false)
           return
@@ -46,11 +46,11 @@ export function useOverpassSearch(editMode: EditMode) {
             try {
               saveEditSession(objects, [], editMode)
             } catch {
-              alert('Слишком много объектов для загрузки. Уменьшите область поиска.')
+              alert(t('alerts.tooManyObjects'))
               setIsLoading(false)
               return
             }
-            alert('Объекты загружены без геометрии площадок (ограничение памяти). Редактирование тегов доступно.')
+            alert(t('alerts.loadedWithoutGeometry'))
           } else {
             throw e
           }
@@ -58,12 +58,12 @@ export function useOverpassSearch(editMode: EditMode) {
         navigate('/edit')
       } catch (error) {
         console.error('Error loading objects:', error)
-        alert('Ошибка при загрузке объектов. Попробуйте еще раз.')
+        alert(t('alerts.loadError'))
       } finally {
         setIsLoading(false)
       }
     },
-    [editMode, navigate]
+    [editMode, navigate, t]
   )
 
   return { isLoading, runSearch }

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import { auth, getAccessToken } from '../utils/osmAuth'
 import { parseOsmUserXml } from '../utils/parseOsmUser'
@@ -9,6 +10,7 @@ import './LoginPage.css'
 const LoginPage = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { t } = useTranslation()
   const { login, isAuthenticated } = useAuth()
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const LoginPage = () => {
       navigate('/search', { replace: true })
     } catch (error) {
       console.error('OAuth callback error:', error)
-      alert('Ошибка авторизации. Попробуйте еще раз.')
+      alert(t('alerts.authError'))
     }
   }
 
@@ -66,16 +68,16 @@ const LoginPage = () => {
   return (
     <div className="login-page">
       <div className="login-container">
-        <h1>OSM Sport Tag Editor</h1>
-        <p>Приложение для уточнения тега sport для объектов leisure=pitch</p>
+        <h1>{t('login.title')}</h1>
+        <p>{t('login.subtitle')}</p>
         <button onClick={handleLogin} className="login-button">
-          Войти через OpenStreetMap
+          {t('login.button')}
         </button>
         <div className="login-info">
-          <p>Для работы приложения необходимо:</p>
+          <p>{t('login.requirements')}</p>
           <ol>
-            <li>Зарегистрировать OAuth приложение на <a href="https://www.openstreetmap.org/user/your_username/oauth_clients" target="_blank" rel="noopener noreferrer">OpenStreetMap</a></li>
-            <li>Указать Client ID в файле .env</li>
+            <li>{t('login.step1')} <a href="https://www.openstreetmap.org/user/your_username/oauth_clients" target="_blank" rel="noopener noreferrer">OpenStreetMap</a></li>
+            <li>{t('login.step2')}</li>
           </ol>
         </div>
       </div>

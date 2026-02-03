@@ -1,5 +1,6 @@
 import type { EditMode, OverpassElement, OSMObject, PendingChange } from '../types'
 import { EDITOR_TAG, OSM_API_BASE } from '../constants'
+import i18n from '../i18n'
 
 function escapeXml(s: string): string {
   return String(s)
@@ -56,8 +57,8 @@ export function generateOSMChangeXML(changes: PendingChange[], changesetId: stri
 
 function getChangesetComment(editMode: EditMode): string {
   return editMode === 'pitch'
-    ? 'Добавление тега sport для объектов leisure=pitch'
-    : 'Добавление тега residential для объектов landuse=residential'
+    ? i18n.t('changeset.commentPitch')
+    : i18n.t('changeset.commentResidential')
 }
 
 export async function createChangeset(token: string, editMode: EditMode): Promise<string> {

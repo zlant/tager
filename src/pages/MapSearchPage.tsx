@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { MapContainer, TileLayer } from 'react-leaflet'
 import type L from 'leaflet'
 import { useAuth } from '../contexts/AuthContext'
@@ -9,6 +10,7 @@ import { MapResizeFix, MapClickHandler } from '../components/map'
 import './MapSearchPage.css'
 
 const MapSearchPage = () => {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { initialPosition, savePosition } = useMapPosition()
   const { editMode, setEditMode } = useEditModeStorage()
@@ -22,15 +24,15 @@ const MapSearchPage = () => {
   return (
     <div className="map-search-page">
       <div className="map-search-header">
-        <h2>Поиск местности</h2>
+        <h2>{t('mapSearch.title')}</h2>
         <div className="user-info">
-          <span>Пользователь: {user?.displayName}</span>
+          <span>{t('mapSearch.user')}: {user?.displayName}</span>
         </div>
       </div>
       <div className="map-search-body">
         <aside className="map-search-sidebar">
           <div className="mode-selector">
-            <span className="mode-label">Режим</span>
+            <span className="mode-label">{t('mapSearch.mode')}</span>
             <label className="mode-option">
               <input
                 type="radio"
@@ -38,7 +40,7 @@ const MapSearchPage = () => {
                 checked={editMode === 'pitch'}
                 onChange={() => setEditMode('pitch')}
               />
-              <span>leisure=pitch без sport</span>
+              <span>{t('mapSearch.modePitch')}</span>
             </label>
             <label className="mode-option">
               <input
@@ -47,18 +49,18 @@ const MapSearchPage = () => {
                 checked={editMode === 'residential'}
                 onChange={() => setEditMode('residential')}
               />
-              <span>landuse=residential без residential</span>
+              <span>{t('mapSearch.modeResidential')}</span>
             </label>
           </div>
           <p className="sidebar-hint">
-            Переместите карту к нужной области и нажмите «Загрузить объекты»
+            {t('mapSearch.hint')}
           </p>
           <button
             onClick={handleConfirm}
             disabled={!bounds || isLoading}
             className="confirm-button"
           >
-            {isLoading ? 'Загрузка...' : 'Загрузить объекты'}
+            {isLoading ? t('mapSearch.loading') : t('mapSearch.loadButton')}
           </button>
         </aside>
         <div className="map-container-wrapper">

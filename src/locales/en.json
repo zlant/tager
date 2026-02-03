@@ -1,0 +1,85 @@
+{
+  "login": {
+    "title": "OSM Sport Tag Editor",
+    "subtitle": "App for refining the sport tag for leisure=pitch objects",
+    "button": "Sign in with OpenStreetMap",
+    "authError": "Authorization error. Please try again.",
+    "requirements": "To use the app you need:",
+    "step1": "Register an OAuth app at",
+    "step2": "Set Client ID in .env file"
+  },
+  "mapSearch": {
+    "title": "Area search",
+    "user": "User",
+    "mode": "Mode",
+    "modePitch": "leisure=pitch without sport",
+    "modeResidential": "landuse=residential without residential",
+    "hint": "Move the map to the desired area and click «Load objects»",
+    "loadButton": "Load objects",
+    "loading": "Loading..."
+  },
+  "edit": {
+    "title": "Editing objects",
+    "prev": "← Back",
+    "next": "Next →",
+    "prevAria": "Previous object",
+    "nextAria": "Next object",
+    "changed": "Changed",
+    "openOsm": "Open on osm.org",
+    "noObjects": "No objects found"
+  },
+  "editPage": {
+    "scrollToForm": "To form",
+    "scrollToFormAria": "Scroll to form"
+  },
+  "form": {
+    "sportTitle": "Select sport tag value",
+    "residentialTitle": "Select residential tag value",
+    "customLabel": "Or enter your own value:",
+    "sportPlaceholder": "e.g. futsal;basketball",
+    "residentialPlaceholder": "e.g. apartments",
+    "confirm": "Confirm and continue",
+    "skip": "Skip",
+    "finish": "Finish"
+  },
+  "changeset": {
+    "commentPitch": "Adding sport tag for leisure=pitch objects",
+    "commentResidential": "Adding residential tag for landuse=residential objects"
+  },
+  "alerts": {
+    "confirmSport": "Select or enter a value for the sport tag",
+    "confirmResidential": "Select or enter a value for the residential tag",
+    "noChanges": "No changes to save",
+    "saved": "Changes saved to OSM! Objects processed: {{count}}",
+    "saveError": "Error saving changes",
+    "allProcessed": "All objects processed. No changes to save.",
+    "authError": "Authorization error. Please try again.",
+    "noResultsPitch": "No leisure=pitch objects without sport tag found in the selected area",
+    "noResultsResidential": "No landuse=residential objects without residential tag found in the selected area",
+    "tooManyObjects": "Too many objects to load. Reduce the search area.",
+    "loadedWithoutGeometry": "Objects loaded without pitch geometry (memory limit). Tag editing is available.",
+    "loadError": "Error loading objects. Please try again."
+  },
+  "sport": {
+    "basketball": "Basketball",
+    "tennis": "Tennis",
+    "volleyball": "Volleyball",
+    "soccer": "Soccer",
+    "baseball": "Baseball",
+    "rugby": "Rugby",
+    "ice_hockey": "Ice hockey",
+    "futsal": "Futsal",
+    "beachvolleyball": "Beach volleyball",
+    "american_football": "American football",
+    "cricket": "Cricket"
+  },
+  "residential": {
+    "urban": "Urban",
+    "rural": "Rural",
+    "apartments": "Apartments",
+    "detached": "Detached",
+    "terrace": "Terrace",
+    "duplex": "Duplex",
+    "single_family": "Single family"
+  }
+}
