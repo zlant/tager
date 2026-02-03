@@ -1,7 +1,7 @@
 {
   "login": {
-    "title": "OSM Sport Tag Editor",
-    "subtitle": "Приложение для уточнения тега sport для объектов leisure=pitch",
+    "title": "Tager",
+    "subtitle": "Приложение для уточнения тегов объектов OpenStreetMap по области на карте",
     "button": "Войти через OpenStreetMap",
     "authError": "Ошибка авторизации. Попробуйте еще раз.",
     "requirements": "Для работы приложения необходимо:",

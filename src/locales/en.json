@@ -1,7 +1,7 @@
 {
   "login": {
-    "title": "OSM Sport Tag Editor",
-    "subtitle": "App for refining the sport tag for leisure=pitch objects",
+    "title": "Tager",
+    "subtitle": "App for refining OpenStreetMap object tags by area on the map",
     "button": "Sign in with OpenStreetMap",
     "authError": "Authorization error. Please try again.",
     "requirements": "To use the app you need:",
