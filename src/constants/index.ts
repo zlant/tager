@@ -23,26 +23,48 @@ export const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter'
 export const OSM_API_BASE = 'https://api.openstreetmap.org/api/0.6'
 export const OSM_USER_URL = `${OSM_API_BASE}/user/details`
 
-export const POPULAR_SPORTS = [
-  'basketball', 'tennis', 'volleyball', 'soccer', 'baseball',
-  'rugby', 'ice_hockey', 'futsal',
-  'beachvolleyball', 'american_football', 'cricket',
-] as const
+/** Option with optional icon URL (e.g. from OSM wiki). */
+export interface FormOption {
+  value: string
+  icon?: string
+}
 
-export const POPULAR_RESIDENTIAL = [
-  'urban', 'rural', 'apartments', 'detached', 'terrace',
-  'duplex', 'single_family'
-] as const
+const WIKI_IMG = 'https://wiki.openstreetmap.org/wiki/Special:FilePath'
 
-export const POPULAR_ROOF_SHAPES = [
-  'gabled',
-  'flat',
-  'hipped',
-  'pyramidal',
-  'skillion',
-  'half-hipped',
-  'pitched',
-  'side_hipped',
-  'round',
-  'gambrel',
-] as const
+/** Options per edit mode: value + optional icon. Icons from https://wiki.openstreetmap.org/wiki/Key:roof:shape etc. */
+export const OPTIONS_BY_MODE: Record<string, FormOption[]> = {
+  pitch: [
+    { value: 'basketball' },
+    { value: 'tennis' },
+    { value: 'volleyball' },
+    { value: 'soccer' },
+    { value: 'baseball' },
+    { value: 'rugby' },
+    { value: 'ice_hockey' },
+    { value: 'futsal' },
+    { value: 'beachvolleyball' },
+    { value: 'american_football' },
+    { value: 'cricket' },
+  ],
+  residential: [
+    { value: 'urban' },
+    { value: 'rural' },
+    { value: 'apartments' },
+    { value: 'detached' },
+    { value: 'terrace' },
+    { value: 'duplex' },
+    { value: 'single_family' },
+  ],
+  roof_shape_apartments: [
+    { value: 'gabled', icon: `${WIKI_IMG}/Roof_Gabled.png` },
+    { value: 'flat', icon: `${WIKI_IMG}/Roof_Flat.png` },
+    { value: 'hipped', icon: `${WIKI_IMG}/Roof_Hipped.png` },
+    { value: 'pyramidal', icon: `${WIKI_IMG}/Roof_Pyramidal.png` },
+    { value: 'skillion', icon: `${WIKI_IMG}/Roof_Skillion.png` },
+    { value: 'half-hipped', icon: `${WIKI_IMG}/Roof_Half_Hipped.png` },
+    { value: 'pitched', icon: `${WIKI_IMG}/Roof_Gabled.png` }, // pitched = gabled per OSM wiki
+    { value: 'side_hipped', icon: `${WIKI_IMG}/Roof_Side_Hipped.png` },
+    { value: 'round', icon: `${WIKI_IMG}/Roof_Round.png` },
+    { value: 'gambrel', icon: `${WIKI_IMG}/Roof_Gambrel.png` },
+  ],
+}

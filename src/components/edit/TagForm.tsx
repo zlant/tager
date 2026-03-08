@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { EditMode } from '../../types'
-import { POPULAR_SPORTS, POPULAR_RESIDENTIAL, POPULAR_ROOF_SHAPES } from '../../constants'
+import { OPTIONS_BY_MODE } from '../../constants'
 
 interface TagFormProps {
   editMode: EditMode
@@ -48,16 +48,26 @@ export const TagForm: React.FC<TagFormProps> = ({
         <>
           <h3>{t('form.sportTitle')}</h3>
           <div className="sport-checkboxes">
-            {POPULAR_SPORTS.map((sport) => (
-              <label key={sport} className="sport-checkbox">
+            {OPTIONS_BY_MODE.pitch.map((opt) => (
+              <label key={opt.value} className="sport-checkbox">
                 <input
                   type="checkbox"
-                  checked={selectedSports.includes(sport)}
-                  onChange={() => onSportToggle(sport)}
+                  checked={selectedSports.includes(opt.value)}
+                  onChange={() => onSportToggle(opt.value)}
                 />
+                {opt.icon && (
+                  <img
+                    src={opt.icon}
+                    alt=""
+                    className="option-icon"
+                    width={48}
+                    height={32}
+                    loading="lazy"
+                  />
+                )}
                 <span className="tag-label">
-                  {t(`sport.${sport}`)}
-                  <small>{sport}</small>
+                  {t(`sport.${opt.value}`)}
+                  <small>{opt.value}</small>
                 </span>
               </label>
             ))}
@@ -78,18 +88,28 @@ export const TagForm: React.FC<TagFormProps> = ({
         <>
           <h3>{t('form.residentialTitle')}</h3>
           <div className="sport-checkboxes">
-            {POPULAR_RESIDENTIAL.map((value) => (
-              <label key={value} className="sport-checkbox">
+            {OPTIONS_BY_MODE.residential.map((opt) => (
+              <label key={opt.value} className="sport-checkbox">
                 <input
                   type="radio"
                   name="residential"
-                  value={value}
-                  checked={selectedResidential === value}
-                  onChange={() => onResidentialSelect(value)}
+                  value={opt.value}
+                  checked={selectedResidential === opt.value}
+                  onChange={() => onResidentialSelect(opt.value)}
                 />
+                {opt.icon && (
+                  <img
+                    src={opt.icon}
+                    alt=""
+                    className="option-icon"
+                    width={48}
+                    height={32}
+                    loading="lazy"
+                  />
+                )}
                 <span className="tag-label">
-                  {t(`residential.${value}`)}
-                  <small>{value}</small>
+                  {t(`residential.${opt.value}`)}
+                  <small>{opt.value}</small>
                 </span>
               </label>
             ))}
@@ -110,18 +130,28 @@ export const TagForm: React.FC<TagFormProps> = ({
         <>
           <h3>{t('form.roofShapeTitle')}</h3>
           <div className="sport-checkboxes">
-            {POPULAR_ROOF_SHAPES.map((value) => (
-              <label key={value} className="sport-checkbox">
+            {OPTIONS_BY_MODE.roof_shape_apartments.map((opt) => (
+              <label key={opt.value} className="sport-checkbox">
                 <input
                   type="radio"
                   name="roofShape"
-                  value={value}
-                  checked={selectedRoofShape === value}
-                  onChange={() => onRoofShapeSelect(value)}
+                  value={opt.value}
+                  checked={selectedRoofShape === opt.value}
+                  onChange={() => onRoofShapeSelect(opt.value)}
                 />
+                {opt.icon && (
+                  <img
+                    src={opt.icon}
+                    alt=""
+                    className="option-icon"
+                    width={48}
+                    height={32}
+                    loading="lazy"
+                  />
+                )}
                 <span className="tag-label">
-                  {t(`roofShape.${value}`)}
-                  <small>{value}</small>
+                  {t(`roofShape.${opt.value}`)}
+                  <small>{opt.value}</small>
                 </span>
               </label>
             ))}

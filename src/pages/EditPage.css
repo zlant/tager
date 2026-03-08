@@ -158,6 +158,19 @@
   cursor: pointer;
 }
 
+.sport-checkboxes:has(.option-icon) {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+.sport-checkbox .option-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 2px;
+  background: #f5f5f5;
+}
+
 .custom-sport-input {
   margin-bottom: 1.5rem;
 }
