@@ -1,6 +1,8 @@
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { EditMode } from '../../types'
 import { OPTIONS_BY_MODE } from '../../constants'
+import { OptionIconWithTooltip } from './OptionIconWithTooltip'
 
 interface TagFormProps {
   editMode: EditMode
@@ -20,6 +22,51 @@ interface TagFormProps {
   onSkip: () => void
   onFinish: () => void
   isSubmitting: boolean
+}
+
+interface OptionRowProps {
+  inputType: 'checkbox' | 'radio'
+  name?: string
+  checked: boolean
+  onChange: () => void
+  labelText: string
+  value: string
+  icon?: string
+}
+
+const OptionRow: React.FC<OptionRowProps> = ({
+  inputType,
+  name,
+  checked,
+  onChange,
+  labelText,
+  value,
+  icon,
+}) => {
+  const labelRef = useRef<HTMLLabelElement>(null)
+  const [open, setOpen] = useState(false)
+
+  return (
+    <label
+      ref={labelRef}
+      className="sport-checkbox"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <input
+        type={inputType}
+        name={name}
+        value={value}
+        checked={checked}
+        onChange={onChange}
+      />
+      {icon && <OptionIconWithTooltip src={icon} anchorRef={labelRef} open={open} />}
+      <span className="tag-label">
+        {labelText}
+        <small>{value}</small>
+      </span>
+    </label>
+  )
 }
 
 export const TagForm: React.FC<TagFormProps> = ({
@@ -42,6 +89,7 @@ export const TagForm: React.FC<TagFormProps> = ({
   isSubmitting,
 }) => {
   const { t } = useTranslation()
+
   return (
     <div className="sport-form">
       {editMode === 'pitch' ? (
@@ -49,27 +97,15 @@ export const TagForm: React.FC<TagFormProps> = ({
           <h3>{t('form.sportTitle')}</h3>
           <div className="sport-checkboxes">
             {OPTIONS_BY_MODE.pitch.map((opt) => (
-              <label key={opt.value} className="sport-checkbox">
-                <input
-                  type="checkbox"
-                  checked={selectedSports.includes(opt.value)}
-                  onChange={() => onSportToggle(opt.value)}
-                />
-                {opt.icon && (
-                  <img
-                    src={opt.icon}
-                    alt=""
-                    className="option-icon"
-                    width={48}
-                    height={32}
-                    loading="lazy"
-                  />
-                )}
-                <span className="tag-label">
-                  {t(`sport.${opt.value}`)}
-                  <small>{opt.value}</small>
-                </span>
-              </label>
+              <OptionRow
+                key={opt.value}
+                inputType="checkbox"
+                checked={selectedSports.includes(opt.value)}
+                onChange={() => onSportToggle(opt.value)}
+                labelText={t(`sport.${opt.value}`)}
+                value={opt.value}
+                icon={opt.icon}
+              />
             ))}
           </div>
           <div className="custom-sport-input">
@@ -89,29 +125,16 @@ export const TagForm: React.FC<TagFormProps> = ({
           <h3>{t('form.residentialTitle')}</h3>
           <div className="sport-checkboxes">
             {OPTIONS_BY_MODE.residential.map((opt) => (
-              <label key={opt.value} className="sport-checkbox">
-                <input
-                  type="radio"
-                  name="residential"
-                  value={opt.value}
-                  checked={selectedResidential === opt.value}
-                  onChange={() => onResidentialSelect(opt.value)}
-                />
-                {opt.icon && (
-                  <img
-                    src={opt.icon}
-                    alt=""
-                    className="option-icon"
-                    width={48}
-                    height={32}
-                    loading="lazy"
-                  />
-                )}
-                <span className="tag-label">
-                  {t(`residential.${opt.value}`)}
-                  <small>{opt.value}</small>
-                </span>
-              </label>
+              <OptionRow
+                key={opt.value}
+                inputType="radio"
+                name="residential"
+                checked={selectedResidential === opt.value}
+                onChange={() => onResidentialSelect(opt.value)}
+                labelText={t(`residential.${opt.value}`)}
+                value={opt.value}
+                icon={opt.icon}
+              />
             ))}
           </div>
           <div className="custom-sport-input">
@@ -131,29 +154,16 @@ export const TagForm: React.FC<TagFormProps> = ({
           <h3>{t('form.roofShapeTitle')}</h3>
           <div className="sport-checkboxes">
             {OPTIONS_BY_MODE.roof_shape_apartments.map((opt) => (
-              <label key={opt.value} className="sport-checkbox">
-                <input
-                  type="radio"
-                  name="roofShape"
-                  value={opt.value}
-                  checked={selectedRoofShape === opt.value}
-                  onChange={() => onRoofShapeSelect(opt.value)}
-                />
-                {opt.icon && (
-                  <img
-                    src={opt.icon}
-                    alt=""
-                    className="option-icon"
-                    width={48}
-                    height={32}
-                    loading="lazy"
-                  />
-                )}
-                <span className="tag-label">
-                  {t(`roofShape.${opt.value}`)}
-                  <small>{opt.value}</small>
-                </span>
-              </label>
+              <OptionRow
+                key={opt.value}
+                inputType="radio"
+                name="roofShape"
+                checked={selectedRoofShape === opt.value}
+                onChange={() => onRoofShapeSelect(opt.value)}
+                labelText={t(`roofShape.${opt.value}`)}
+                value={opt.value}
+                icon={opt.icon}
+              />
             ))}
           </div>
           <div className="custom-sport-input">
