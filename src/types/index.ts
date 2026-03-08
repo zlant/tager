@@ -1,4 +1,4 @@
-export type EditMode = 'pitch' | 'residential'
+export type EditMode = 'pitch' | 'residential' | 'roof_shape_apartments'
 
 export interface OverpassElement {
   type: 'node' | 'way' | 'relation'
@@ -33,7 +33,7 @@ export interface User {
   displayName: string
 }
 
-export type TagKeyForMode = 'sport' | 'residential'
+export type TagKeyForMode = 'sport' | 'residential' | 'roof:shape'
 
 export interface PendingChange {
   object: OSMObject

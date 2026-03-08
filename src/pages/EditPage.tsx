@@ -27,12 +27,16 @@ const EditPage = () => {
     customSport: string
     selectedResidential: string
     customResidential: string
+    selectedRoofShape: string
+    customRoofShape: string
   }
   const emptyForm: FormState = {
     selectedSports: [],
     customSport: '',
     selectedResidential: '',
     customResidential: '',
+    selectedRoofShape: '',
+    customRoofShape: '',
   }
 
   const [formStateByObjectId, setFormStateByObjectId] = useState<Record<string, FormState>>({})
@@ -40,6 +44,8 @@ const EditPage = () => {
   const [customSport, setCustomSport] = useState('')
   const [selectedResidential, setSelectedResidential] = useState<string>('')
   const [customResidential, setCustomResidential] = useState('')
+  const [selectedRoofShape, setSelectedRoofShape] = useState<string>('')
+  const [customRoofShape, setCustomRoofShape] = useState('')
   const [changes, setChanges] = useState<PendingChange[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -79,6 +85,8 @@ const EditPage = () => {
     setCustomSport(saved.customSport)
     setSelectedResidential(saved.selectedResidential)
     setCustomResidential(saved.customResidential)
+    setSelectedRoofShape(saved.selectedRoofShape)
+    setCustomRoofShape(saved.customRoofShape)
   }, [session?.currentIndex, session?.currentObject?.id, session?.currentObject?.type, formStateByObjectId])
 
   const saveFormForCurrentObject = useCallback(() => {
@@ -91,9 +99,11 @@ const EditPage = () => {
         customSport,
         selectedResidential,
         customResidential,
+        selectedRoofShape,
+        customRoofShape,
       },
     }))
-  }, [session?.currentObject, selectedSports, customSport, selectedResidential, customResidential])
+  }, [session?.currentObject, selectedSports, customSport, selectedResidential, customResidential, selectedRoofShape, customRoofShape])
 
   const handleSportToggle = (sport: string) => {
     setSelectedSports((prev) =>
@@ -105,20 +115,33 @@ const EditPage = () => {
     setSelectedResidential((prev) => (prev === value ? '' : value))
   }
 
-  const tagKey: TagKeyForMode = session?.editMode === 'pitch' ? 'sport' : 'residential'
+  const handleRoofShapeSelect = (value: string) => {
+    setSelectedRoofShape((prev) => (prev === value ? '' : value))
+  }
+
+  const tagKey: TagKeyForMode =
+    session?.editMode === 'pitch'
+      ? 'sport'
+      : session?.editMode === 'residential'
+        ? 'residential'
+        : 'roof:shape'
 
   const handleConfirm = () => {
     if (!session?.currentObject) return
     const tagValue =
       session.editMode === 'pitch'
         ? customSport.trim() || selectedSports.join(';')
-        : customResidential.trim() || selectedResidential
+        : session.editMode === 'residential'
+          ? customResidential.trim() || selectedResidential
+          : customRoofShape.trim() || selectedRoofShape
 
     if (!tagValue) {
       alert(
         session.editMode === 'pitch'
           ? t('alerts.confirmSport')
-          : t('alerts.confirmResidential')
+          : session.editMode === 'residential'
+            ? t('alerts.confirmResidential')
+            : t('alerts.confirmRoofShape')
       )
       return
     }
@@ -131,6 +154,8 @@ const EditPage = () => {
         customSport,
         selectedResidential,
         customResidential,
+        selectedRoofShape,
+        customRoofShape,
       },
     }))
     const newChanges: PendingChange[] = [
@@ -142,6 +167,8 @@ const EditPage = () => {
     setCustomSport('')
     setSelectedResidential('')
     setCustomResidential('')
+    setSelectedRoofShape('')
+    setCustomRoofShape('')
 
     if (session.currentIndex < session.objects.length - 1) {
       const nextIndex = session.currentIndex + 1
@@ -168,6 +195,8 @@ const EditPage = () => {
     setCustomSport('')
     setSelectedResidential('')
     setCustomResidential('')
+    setSelectedRoofShape('')
+    setCustomRoofShape('')
 
     if (session.currentIndex < session.objects.length - 1) {
       session.setCurrentIndex(session.currentIndex + 1)
@@ -319,10 +348,14 @@ const EditPage = () => {
             customSport={customSport}
             selectedResidential={selectedResidential}
             customResidential={customResidential}
+            selectedRoofShape={selectedRoofShape}
+            customRoofShape={customRoofShape}
             onSportToggle={handleSportToggle}
             onResidentialSelect={handleResidentialSelect}
+            onRoofShapeSelect={handleRoofShapeSelect}
             onCustomSportChange={setCustomSport}
             onCustomResidentialChange={setCustomResidential}
+            onCustomRoofShapeChange={setCustomRoofShape}
             onConfirm={handleConfirm}
             onSkip={handleSkip}
             onFinish={() => handleFinish()}

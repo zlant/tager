@@ -38,7 +38,7 @@ export function savePosition(center: { lat: number; lng: number }, zoom: number)
 
 export function loadSavedEditMode(): EditMode {
   const raw = localStorage.getItem(STORAGE_KEYS.EDIT_MODE)
-  if (raw === 'pitch' || raw === 'residential') return raw
+  if (raw === 'pitch' || raw === 'residential' || raw === 'roof_shape_apartments') return raw
   return 'pitch'
 }
 
@@ -63,7 +63,7 @@ export function setCurrentIndex(index: number): void {
 
 export function getStoredEditMode(): EditMode | null {
   const raw = sessionStorage.getItem(SESSION_KEYS.EDIT_MODE)
-  if (raw === 'pitch' || raw === 'residential') return raw
+  if (raw === 'pitch' || raw === 'residential' || raw === 'roof_shape_apartments') return raw
   return null
 }
 

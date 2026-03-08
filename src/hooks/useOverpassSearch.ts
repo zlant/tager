@@ -21,8 +21,14 @@ export function useOverpassSearch(editMode: EditMode) {
         const targetElements = getTargetElements(data, editMode)
 
         if (targetElements.length === 0) {
+          const msg =
+            editMode === 'pitch'
+              ? t('alerts.noResultsPitch')
+              : editMode === 'residential'
+                ? t('alerts.noResultsResidential')
+                : t('alerts.noResultsRoofShapeApartments')
           alert(
-            editMode === 'pitch' ? t('alerts.noResultsPitch') : t('alerts.noResultsResidential')
+            msg
           )
           setIsLoading(false)
           return
@@ -85,7 +91,7 @@ export function useEditSession(): {
     const storedObjects = sessionStorage.getItem(SESSION_KEYS.OSM_OBJECTS)
     const storedFullJson = sessionStorage.getItem(SESSION_KEYS.OSM_FULL_JSON)
     const storedIndex = sessionStorage.getItem(SESSION_KEYS.CURRENT_INDEX)
-    if (storedMode !== 'pitch' && storedMode !== 'residential') return null
+    if (storedMode !== 'pitch' && storedMode !== 'residential' && storedMode !== 'roof_shape_apartments') return null
     if (!storedObjects) return null
     try {
       const parsed = JSON.parse(storedObjects) as Array<{

@@ -14,6 +14,7 @@
     "mode": "Mode",
     "modePitch": "leisure=pitch without sport",
     "modeResidential": "landuse=residential without residential",
+    "modeRoofShapeApartments": "building=apartments without roof:shape",
     "hint": "Move the map to the desired area and click «Load objects»",
     "loadButton": "Load objects",
     "loading": "Loading..."
@@ -35,20 +36,24 @@
   "form": {
     "sportTitle": "Select sport tag value",
     "residentialTitle": "Select residential tag value",
+    "roofShapeTitle": "Select roof:shape tag value",
     "customLabel": "Or enter your own value:",
     "sportPlaceholder": "e.g. futsal;basketball",
     "residentialPlaceholder": "e.g. apartments",
+    "roofShapePlaceholder": "e.g. gabled",
     "confirm": "Confirm and continue",
     "skip": "Skip",
     "finish": "Finish"
   },
   "changeset": {
     "commentPitch": "Adding sport tag for leisure=pitch objects",
-    "commentResidential": "Adding residential tag for landuse=residential objects"
+    "commentResidential": "Adding residential tag for landuse=residential objects",
+    "commentRoofShapeApartments": "Adding roof:shape tag for building=apartments objects"
   },
   "alerts": {
     "confirmSport": "Select or enter a value for the sport tag",
     "confirmResidential": "Select or enter a value for the residential tag",
+    "confirmRoofShape": "Select or enter a value for the roof:shape tag",
     "noChanges": "No changes to save",
     "saved": "Changes saved to OSM! Objects processed: {{count}}",
     "saveError": "Error saving changes",
@@ -56,6 +61,7 @@
     "authError": "Authorization error. Please try again.",
     "noResultsPitch": "No leisure=pitch objects without sport tag found in the selected area",
     "noResultsResidential": "No landuse=residential objects without residential tag found in the selected area",
+    "noResultsRoofShapeApartments": "No building=apartments objects without roof:shape tag found in the selected area",
     "tooManyObjects": "Too many objects to load. Reduce the search area.",
     "loadedWithoutGeometry": "Objects loaded without pitch geometry (memory limit). Tag editing is available.",
     "loadError": "Error loading objects. Please try again."
@@ -81,5 +87,17 @@
     "terrace": "Terrace",
     "duplex": "Duplex",
     "single_family": "Single family"
+  },
+  "roofShape": {
+    "gabled": "Gabled",
+    "flat": "Flat",
+    "hipped": "Hipped",
+    "pyramidal": "Pyramidal",
+    "skillion": "Skillion",
+    "half-hipped": "Half-hipped",
+    "pitched": "Pitched",
+    "side_hipped": "Side hipped",
+    "round": "Round",
+    "gambrel": "Gambrel"
   }
 }

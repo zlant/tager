@@ -14,6 +14,7 @@
     "mode": "Режим",
     "modePitch": "leisure=pitch без sport",
     "modeResidential": "landuse=residential без residential",
+    "modeRoofShapeApartments": "building=apartments без roof:shape",
     "hint": "Переместите карту к нужной области и нажмите «Загрузить объекты»",
     "loadButton": "Загрузить объекты",
     "loading": "Загрузка..."
@@ -35,20 +36,24 @@
   "form": {
     "sportTitle": "Выберите значение тега sport",
     "residentialTitle": "Выберите значение тега residential",
+    "roofShapeTitle": "Выберите значение тега roof:shape",
     "customLabel": "Или введите свое значение:",
     "sportPlaceholder": "например: futsal;basketball",
     "residentialPlaceholder": "например: apartments",
+    "roofShapePlaceholder": "например: gabled",
     "confirm": "Подтвердить и продолжить",
     "skip": "Пропустить",
     "finish": "Завершить"
   },
   "changeset": {
     "commentPitch": "Добавление тега sport для объектов leisure=pitch",
-    "commentResidential": "Добавление тега residential для объектов landuse=residential"
+    "commentResidential": "Добавление тега residential для объектов landuse=residential",
+    "commentRoofShapeApartments": "Добавление тега roof:shape для объектов building=apartments"
   },
   "alerts": {
     "confirmSport": "Выберите или введите значение для тега sport",
     "confirmResidential": "Выберите или введите значение для тега residential",
+    "confirmRoofShape": "Выберите или введите значение для тега roof:shape",
     "noChanges": "Нет изменений для сохранения",
     "saved": "Изменения сохранены в OSM! Обработано объектов: {{count}}",
     "saveError": "Ошибка при сохранении изменений",
@@ -56,6 +61,7 @@
     "authError": "Ошибка авторизации. Попробуйте еще раз.",
     "noResultsPitch": "В выбранной области не найдено объектов leisure=pitch без тега sport",
     "noResultsResidential": "В выбранной области не найдено объектов landuse=residential без тега residential",
+    "noResultsRoofShapeApartments": "В выбранной области не найдено объектов building=apartments без тега roof:shape",
     "tooManyObjects": "Слишком много объектов для загрузки. Уменьшите область поиска.",
     "loadedWithoutGeometry": "Объекты загружены без геометрии площадок (ограничение памяти). Редактирование тегов доступно.",
     "loadError": "Ошибка при загрузке объектов. Попробуйте еще раз."
@@ -81,5 +87,17 @@
     "terrace": "Террасная застройка",
     "duplex": "Двухквартирные дома",
     "single_family": "Одноквартирные дома"
+  },
+  "roofShape": {
+    "gabled": "Двускатная",
+    "flat": "Плоская",
+    "hipped": "Вальмовая",
+    "pyramidal": "Шатровая",
+    "skillion": "Односкатная",
+    "half-hipped": "Полувальмовая",
+    "pitched": "Скатная",
+    "side_hipped": "Боковая вальмовая",
+    "round": "Круглая",
+    "gambrel": "Ломаная (gambrel)"
   }
 }

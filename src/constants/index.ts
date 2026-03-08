@@ -33,3 +33,16 @@ export const POPULAR_RESIDENTIAL = [
   'urban', 'rural', 'apartments', 'detached', 'terrace',
   'duplex', 'single_family'
 ] as const
+
+export const POPULAR_ROOF_SHAPES = [
+  'gabled',
+  'flat',
+  'hipped',
+  'pyramidal',
+  'skillion',
+  'half-hipped',
+  'pitched',
+  'side_hipped',
+  'round',
+  'gambrel',
+] as const

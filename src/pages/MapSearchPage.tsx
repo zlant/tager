@@ -51,6 +51,15 @@ const MapSearchPage = () => {
               />
               <span>{t('mapSearch.modeResidential')}</span>
             </label>
+            <label className="mode-option">
+              <input
+                type="radio"
+                name="editMode"
+                checked={editMode === 'roof_shape_apartments'}
+                onChange={() => setEditMode('roof_shape_apartments')}
+              />
+              <span>{t('mapSearch.modeRoofShapeApartments')}</span>
+            </label>
           </div>
           <p className="sidebar-hint">
             {t('mapSearch.hint')}

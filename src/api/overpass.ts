@@ -13,11 +13,22 @@ function buildOverpassQuery(bbox: string, editMode: EditMode): string {
       out meta;
     `
   }
+  if (editMode === 'residential') {
+    return `
+      [out:json][timeout:25];
+      (
+        way["landuse"="residential"][!"residential"](${bbox});
+        relation["landuse"="residential"][!"residential"](${bbox});
+      );
+      (._;>;);
+      out meta;
+    `
+  }
   return `
     [out:json][timeout:25];
     (
-      way["landuse"="residential"][!"residential"](${bbox});
-      relation["landuse"="residential"][!"residential"](${bbox});
+      way["building"="apartments"][!"roof:shape"](${bbox});
+      relation["building"="apartments"][!"roof:shape"](${bbox});
     );
     (._;>;);
     out meta;
@@ -33,15 +44,31 @@ function filterTargetElements(elements: OverpassElement[], editMode: EditMode): 
       ),
     ]
   }
+  if (editMode === 'residential') {
+    return [
+      ...elements.filter(
+        (e) => e.type === 'way' && e.tags?.landuse === 'residential' && !e.tags?.residential
+      ),
+      ...elements.filter(
+        (e) =>
+          e.type === 'relation' &&
+          e.tags?.landuse === 'residential' &&
+          !e.tags?.residential
+      ),
+    ]
+  }
   return [
     ...elements.filter(
-      (e) => e.type === 'way' && e.tags?.landuse === 'residential' && !e.tags?.residential
+      (e) =>
+        e.type === 'way' &&
+        e.tags?.building === 'apartments' &&
+        !e.tags?.['roof:shape']
     ),
     ...elements.filter(
       (e) =>
         e.type === 'relation' &&
-        e.tags?.landuse === 'residential' &&
-        !e.tags?.residential
+        e.tags?.building === 'apartments' &&
+        !e.tags?.['roof:shape']
     ),
   ]
 }

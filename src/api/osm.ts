@@ -56,9 +56,9 @@ export function generateOSMChangeXML(changes: PendingChange[], changesetId: stri
 }
 
 function getChangesetComment(editMode: EditMode): string {
-  return editMode === 'pitch'
-    ? i18n.t('changeset.commentPitch')
-    : i18n.t('changeset.commentResidential')
+  if (editMode === 'pitch') return i18n.t('changeset.commentPitch')
+  if (editMode === 'residential') return i18n.t('changeset.commentResidential')
+  return i18n.t('changeset.commentRoofShapeApartments')
 }
 
 export async function createChangeset(token: string, editMode: EditMode): Promise<string> {

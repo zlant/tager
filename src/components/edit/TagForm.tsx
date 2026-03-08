@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { EditMode } from '../../types'
-import { POPULAR_SPORTS, POPULAR_RESIDENTIAL } from '../../constants'
+import { POPULAR_SPORTS, POPULAR_RESIDENTIAL, POPULAR_ROOF_SHAPES } from '../../constants'
 
 interface TagFormProps {
   editMode: EditMode
@@ -8,10 +8,14 @@ interface TagFormProps {
   customSport: string
   selectedResidential: string
   customResidential: string
+  selectedRoofShape: string
+  customRoofShape: string
   onSportToggle: (sport: string) => void
   onResidentialSelect: (value: string) => void
+  onRoofShapeSelect: (value: string) => void
   onCustomSportChange: (value: string) => void
   onCustomResidentialChange: (value: string) => void
+  onCustomRoofShapeChange: (value: string) => void
   onConfirm: () => void
   onSkip: () => void
   onFinish: () => void
@@ -24,10 +28,14 @@ export const TagForm: React.FC<TagFormProps> = ({
   customSport,
   selectedResidential,
   customResidential,
+  selectedRoofShape,
+  customRoofShape,
   onSportToggle,
   onResidentialSelect,
+  onRoofShapeSelect,
   onCustomSportChange,
   onCustomResidentialChange,
+  onCustomRoofShapeChange,
   onConfirm,
   onSkip,
   onFinish,
@@ -66,7 +74,7 @@ export const TagForm: React.FC<TagFormProps> = ({
             </label>
           </div>
         </>
-      ) : (
+      ) : editMode === 'residential' ? (
         <>
           <h3>{t('form.residentialTitle')}</h3>
           <div className="sport-checkboxes">
@@ -94,6 +102,38 @@ export const TagForm: React.FC<TagFormProps> = ({
                 value={customResidential}
                 onChange={(e) => onCustomResidentialChange(e.target.value)}
                 placeholder={t('form.residentialPlaceholder')}
+              />
+            </label>
+          </div>
+        </>
+      ) : (
+        <>
+          <h3>{t('form.roofShapeTitle')}</h3>
+          <div className="sport-checkboxes">
+            {POPULAR_ROOF_SHAPES.map((value) => (
+              <label key={value} className="sport-checkbox">
+                <input
+                  type="radio"
+                  name="roofShape"
+                  value={value}
+                  checked={selectedRoofShape === value}
+                  onChange={() => onRoofShapeSelect(value)}
+                />
+                <span className="tag-label">
+                  {t(`roofShape.${value}`)}
+                  <small>{value}</small>
+                </span>
+              </label>
+            ))}
+          </div>
+          <div className="custom-sport-input">
+            <label>
+              {t('form.customLabel')}
+              <input
+                type="text"
+                value={customRoofShape}
+                onChange={(e) => onCustomRoofShapeChange(e.target.value)}
+                placeholder={t('form.roofShapePlaceholder')}
               />
             </label>
           </div>
