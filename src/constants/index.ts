@@ -62,7 +62,6 @@ export const OPTIONS_BY_MODE: Record<string, FormOption[]> = {
     { value: 'pyramidal', icon: `${WIKI_IMG}/Roof_Pyramidal.png` },
     { value: 'skillion', icon: `${WIKI_IMG}/Roof_Skillion.png` },
     { value: 'half-hipped', icon: `${WIKI_IMG}/Roof_Half_Hipped.png` },
-    { value: 'pitched', icon: `${WIKI_IMG}/Roof_Gabled.png` }, // pitched = gabled per OSM wiki
     { value: 'side_hipped', icon: `${WIKI_IMG}/Roof_Side_Hipped.png` },
     { value: 'round', icon: `${WIKI_IMG}/Roof_Round.png` },
     { value: 'gambrel', icon: `${WIKI_IMG}/Roof_Gambrel.png` },
