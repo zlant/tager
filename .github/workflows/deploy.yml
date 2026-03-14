@@ -21,6 +21,7 @@ jobs:
       BASE_PATH: /${{ github.event.repository.name }}/
       VITE_OSM_OAUTH_CLIENT_ID: ${{ secrets.VITE_OSM_OAUTH_CLIENT_ID }}
       VITE_OSM_OAUTH_REDIRECT_URI: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/login
+      VITE_MAPBOX_ACCESS_TOKEN: ${{ secrets.VITE_MAPBOX_ACCESS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
